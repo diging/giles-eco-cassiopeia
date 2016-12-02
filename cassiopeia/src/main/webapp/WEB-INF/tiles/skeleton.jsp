@@ -53,6 +53,12 @@
           		<a href="<c:url value="/" />" >Home</a>
           	</li>
           	
+          	<sec:authorize access="hasRole('ROLE_ADMIN')">
+				<li role="presentation"><a
+					href="<c:url value="/admin/system/config" />">System Config</a>
+				</li>
+			</sec:authorize>
+          	
           	<sec:authorize access="isAuthenticated()">
           	<li role="presentation">
          	 	<form action="<c:url value="/logout" />" method="POST">
