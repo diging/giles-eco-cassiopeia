@@ -117,7 +117,7 @@ public class OCRManager implements IOCRManager {
         
         ICompletedOCRRequest completedRequest = null;
         try {
-            completedRequest = requestFactory.createRequest(request.getUploadId());
+            completedRequest = requestFactory.createRequest(request.getRequestId(), request.getUploadId());
         } catch (InstantiationException | IllegalAccessException e) {
             logger.error("Could not create request.", e);
             // this should never happen if used correctly
@@ -128,8 +128,7 @@ public class OCRManager implements IOCRManager {
         completedRequest.setSize(text.size);
         completedRequest.setDownloadUrl(fileEndpoint);
         completedRequest.setFilename(request.getFilename());
-        completedRequest.setFileid(request.getFileid());
-        completedRequest.setRequestId(request.getRequestId());
+        completedRequest.setFileId(request.getFileId());
         completedRequest.setStatus(RequestStatus.COMPLETE);
         completedRequest.setOcrDate(OffsetDateTime.now(ZoneId.of("UTC")).toString());
         completedRequest.setTextFilename(text.filename);
