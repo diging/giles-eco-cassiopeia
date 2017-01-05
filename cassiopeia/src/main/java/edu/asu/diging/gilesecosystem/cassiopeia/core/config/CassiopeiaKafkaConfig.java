@@ -2,6 +2,7 @@ package edu.asu.diging.gilesecosystem.cassiopeia.core.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.IntegerDeserializer;
@@ -37,7 +38,7 @@ public class CassiopeiaKafkaConfig implements KafkaConfig {
                 IntegerDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
                 StringDeserializer.class);
-        props.put(ConsumerConfig.CLIENT_ID_CONFIG, "geco.consumer.cassiopeia.1");
+        props.put(ConsumerConfig.CLIENT_ID_CONFIG, "geco.consumer.cassiopeia." + new Random().nextInt(100));
         // consumer groups allow a pool of processes to divide the work of
         // consuming and processing records
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "gileseco.ocr.processing");
@@ -67,6 +68,11 @@ public class CassiopeiaKafkaConfig implements KafkaConfig {
     @Override
     public String getHosts() {
         return propertiesManager.getProperty(Properties.KAFKA_HOSTS);
+    }
+
+    @Override
+    public String getProducerId() {
+        return "geco.producer.cassiopeia." + new Random().nextInt(100);
     }
 
 }
