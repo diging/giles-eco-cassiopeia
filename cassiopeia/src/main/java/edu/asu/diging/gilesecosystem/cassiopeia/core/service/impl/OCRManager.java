@@ -146,11 +146,7 @@ public class OCRManager implements IOCRManager {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM));
-        headers.set(
-                "Authorization",
-                "token "
-                        + propertyManager
-                                .getProperty(Properties.GILES_ACCESS_TOKEN));
+        headers.set("Authorization", "token " + propertyManager.getProperty(Properties.NEPOMUK_ACCESS_TOKEN));
         HttpEntity<String> entity = new HttpEntity<String>(headers);
 
         ResponseEntity<byte[]> response = restTemplate.exchange(url, HttpMethod.GET,
