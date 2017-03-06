@@ -266,7 +266,7 @@
                 <version>2.2</version>
                 <configuration>
                     <url>${tomcat.path}</url>
-                    <server>CepheusProdTomcatServer</server>
+                    <server>${tomcat.server.id}</server>
                     <path>/${tomcat.app}</path>
                 </configuration>
             </plugin>
