@@ -15,6 +15,10 @@
         <geco.requests.version>0.2.1</geco.requests.version>
         <geco.util.version>0.4.1</geco.util.version>
         
+        <tomcat.deploy.path></tomcat.deploy.path>
+        <tomcat.app.name>cassiopeia</tomcat.app.name>
+        <tomcat.server.id>TomcatServer</tomcat.server.id>
+        
 		<admin.password>admin</admin.password>
 
 		<log.level>debug</log.level>
@@ -256,6 +260,16 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <url>${tomcat.path}</url>
+                    <server>CepheusProdTomcatServer</server>
+                    <path>/${tomcat.app}</path>
+                </configuration>
+            </plugin>
 		</plugins>
 	</build>
 
