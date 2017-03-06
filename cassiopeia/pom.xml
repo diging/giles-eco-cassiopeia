@@ -4,13 +4,17 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.asu.diging.giles-eco</groupId>
 	<artifactId>cassiopeia</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>${geco.cassiopeia.version}</version>
 	<packaging>war</packaging>
 
 	<properties>
+        <geco.cassiopeia.version>v0.2-SNAPSHOT</geco.cassiopeia.version>
 		<org.slf4j-version>1.7.5</org.slf4j-version>
 		<org.springframework-version>4.3.1.RELEASE</org.springframework-version>
 		<spring-security-version>4.1.3.RELEASE</spring-security-version>
+        <geco.requests.version>0.2.1</geco.requests.version>
+        <geco.util.version>0.4.1</geco.util.version>
+        
 		<admin.password>admin</admin.password>
 
 		<log.level>debug</log.level>
@@ -33,12 +37,12 @@
 		<dependency>
 			<groupId>edu.asu.diging.giles-eco</groupId>
 			<artifactId>requests</artifactId>
-			<version>0.1</version>
+			<version>${geco.requests.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>edu.asu.diging.giles-eco</groupId>
 			<artifactId>util</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${geco.util.version}</version>
 		</dependency>
 		
 		
