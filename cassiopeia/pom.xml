@@ -25,6 +25,8 @@
 		<tesseract.bin></tesseract.bin>
 		<tesseract.data></tesseract.data>
 		<tesseract.create.hocr>false</tesseract.create.hocr>
+		
+		<cassiopeia.nepomuk.accessToken></cassiopeia.nepomuk.accessToken>
 	</properties>
 
 	<dependencies>
