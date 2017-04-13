@@ -6,11 +6,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.Arrays;
-
-import javax.annotation.PostConstruct;
 
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
@@ -34,15 +30,9 @@ import org.springframework.web.client.RestTemplate;
 import org.xml.sax.SAXException;
 
 import edu.asu.diging.gilesecosystem.cassiopeia.core.properties.Properties;
+import edu.asu.diging.gilesecosystem.cassiopeia.core.service.IKafkaRequestSender;
 import edu.asu.diging.gilesecosystem.cassiopeia.core.service.IOCRManager;
-import edu.asu.diging.gilesecosystem.cassiopeia.rest.DownloadFileController;
-import edu.asu.diging.gilesecosystem.requests.ICompletedOCRRequest;
 import edu.asu.diging.gilesecosystem.requests.IOCRRequest;
-import edu.asu.diging.gilesecosystem.requests.IRequestFactory;
-import edu.asu.diging.gilesecosystem.requests.RequestStatus;
-import edu.asu.diging.gilesecosystem.requests.exceptions.MessageCreationException;
-import edu.asu.diging.gilesecosystem.requests.impl.CompletedOCRRequest;
-import edu.asu.diging.gilesecosystem.requests.kafka.IRequestProducer;
 import edu.asu.diging.gilesecosystem.util.files.IFileStorageManager;
 import edu.asu.diging.gilesecosystem.util.properties.IPropertiesManager;
 
@@ -59,16 +49,8 @@ public class OCRManager implements IOCRManager {
     private IPropertiesManager propertyManager;
     
     @Autowired
-    private IRequestFactory<ICompletedOCRRequest, CompletedOCRRequest> requestFactory;
-    
-    @Autowired
-    private IRequestProducer requestProducer;
-    
-    
-    @PostConstruct
-    public void init() {
-        requestFactory.config(CompletedOCRRequest.class);
-    }
+    private IKafkaRequestSender kafkaRequestSender;
+
 
     /* (non-Javadoc)
      * @see edu.asu.diging.gilesecosystem.cassiopeia.core.service.impl.IOCRManager#processOCRRequest(edu.asu.diging.gilesecosystem.requests.IOCRRequest)
@@ -76,7 +58,7 @@ public class OCRManager implements IOCRManager {
     @Override
     public void processOCRRequest(IOCRRequest request) {
 
-        String dirFolder = storageManager.getAndCreateStoragePath(request.getRequestId(),
+        storageManager.getAndCreateStoragePath(request.getRequestId(),
                 request.getDocumentId(), null);
         byte[] image = downloadFile(request.getDownloadUrl());
         
@@ -103,41 +85,11 @@ public class OCRManager implements IOCRManager {
             // FIXME: send to monitoring app
         }
         
-        Text text = saveTextToFile(request.getRequestId(), request.getDocumentId(), ocrResult, request.getFilename(), ".txt");
+        RequestInfo info = saveTextToFile(request.getRequestId(), request.getDocumentId(), ocrResult, request.getFilename(), ".txt");
+        info.setUploadId(request.getUploadId());
+        info.setFileId(request.getFileId());
         
-        String restEndpoint = propertyManager.getProperty(Properties.BASE_URL);
-        if (restEndpoint.endsWith("/")) {
-            restEndpoint = restEndpoint.substring(0, restEndpoint.length()-1);
-        }
-        
-        String fileEndpoint = restEndpoint + DownloadFileController.GET_FILE_URL
-                .replace(DownloadFileController.REQUEST_ID_PLACEHOLDER, request.getRequestId())
-                .replace(DownloadFileController.DOCUMENT_ID_PLACEHOLDER, request.getDocumentId())
-                .replace(DownloadFileController.FILENAME_PLACEHOLDER, text.filename);
-        
-        ICompletedOCRRequest completedRequest = null;
-        try {
-            completedRequest = requestFactory.createRequest(request.getRequestId(), request.getUploadId());
-        } catch (InstantiationException | IllegalAccessException e) {
-            logger.error("Could not create request.", e);
-            // this should never happen if used correctly
-        }
-        
-        completedRequest.setDocumentId(request.getDocumentId());
-        completedRequest.setDownloadPath(text.path);
-        completedRequest.setSize(text.size);
-        completedRequest.setDownloadUrl(fileEndpoint);
-        completedRequest.setFilename(request.getFilename());
-        completedRequest.setFileId(request.getFileId());
-        completedRequest.setStatus(RequestStatus.COMPLETE);
-        completedRequest.setOcrDate(OffsetDateTime.now(ZoneId.of("UTC")).toString());
-        completedRequest.setTextFilename(text.filename);
-        
-        try {
-            requestProducer.sendRequest(completedRequest, propertyManager.getProperty(Properties.KAFKA_TOPIC_OCR_COMPLETE));
-        } catch (MessageCreationException e) {
-            logger.error("Could not send message.", e);
-        }
+        kafkaRequestSender.sendRequest(request.getRequestId(), request.getDocumentId(), info);
     }
     
     private byte[] downloadFile(String url) {
@@ -161,7 +113,7 @@ public class OCRManager implements IOCRManager {
         return null;
     }
     
-    protected Text saveTextToFile(String requestId,
+    protected RequestInfo saveTextToFile(String requestId,
             String documentId, String pageText, String filename, String fileExtentions) {
         String docFolder = storageManager.getAndCreateStoragePath(requestId,
                 documentId, null);
@@ -169,6 +121,7 @@ public class OCRManager implements IOCRManager {
         if (!fileExtentions.startsWith(".")) {
             fileExtentions = "." + fileExtentions;
         }
+        String imageFilename = filename;
         filename = filename + fileExtentions;
 
         String filePath = docFolder + File.separator + filename;
@@ -192,19 +145,6 @@ public class OCRManager implements IOCRManager {
         }
 
         String relativePath = storageManager.getFileFolderPathInBaseFolder(requestId, documentId, null);
-        Text text = new Text(relativePath + File.separator + filename, fileObject.length(), filename);
-        return text;
-    }
-    
-    class Text {
-        public String path;
-        public long size;
-        public String filename;
-        
-        public Text(String path, long size, String filename) {
-            this.path = path;
-            this.size = size;
-            this.filename = filename;
-        }
+        return new RequestInfo(relativePath + File.separator + filename, fileObject.length(), imageFilename, filename);
     }
 }
