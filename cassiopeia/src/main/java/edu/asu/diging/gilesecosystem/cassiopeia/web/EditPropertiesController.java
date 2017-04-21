@@ -41,6 +41,7 @@ public class EditPropertiesController {
         
         page.setGilesAccessToken(propertyManager.getProperty(Properties.GILES_ACCESS_TOKEN));
         page.setBaseUrl(propertyManager.getProperty(Properties.BASE_URL));
+        page.setCreatehOCR(propertyManager.getProperty(Properties.TESSERACT_CREATE_HOCR).equalsIgnoreCase("true"));
         
         model.addAttribute("systemConfigPage", page);
         return "admin/system/config";
@@ -60,6 +61,7 @@ public class EditPropertiesController {
         Map<String, String> propertiesMap = new HashMap<String, String>();
         propertiesMap.put(Properties.GILES_ACCESS_TOKEN, systemConfigPage.getGilesAccessToken());
         propertiesMap.put(Properties.BASE_URL, systemConfigPage.getBaseUrl());
+        propertiesMap.put(Properties.TESSERACT_CREATE_HOCR, new Boolean(systemConfigPage.isCreatehOCR()).toString());
         
         try {
             propertyManager.updateProperties(propertiesMap);
