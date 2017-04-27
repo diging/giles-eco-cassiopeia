@@ -34,7 +34,7 @@
 
     <div class="form-group">
         <label for="name">OCR Type</label>
-        <form:select class="form-control" id="selectedOCRType" path="OCRType" items="${ocrTypes}"></form:select>
+        <form:select class="form-control" id="${systemConfigPage.getOCRType()}" path="OCRType" items="${ocrTypes}"></form:select>
     </div>
 
     <button class="btn btn-primary btn-md pull-right" type="submit">Save

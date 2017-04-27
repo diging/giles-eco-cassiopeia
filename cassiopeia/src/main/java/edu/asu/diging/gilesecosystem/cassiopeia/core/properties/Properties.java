@@ -12,5 +12,8 @@ public interface Properties {
     public final static String GILES_ACCESS_TOKEN = "giles_access_token";
     
     public final static String KAFKA_TOPIC_OCR_COMPLETE = "topic_orc_request_complete";
+
+    public final static String OCR_PLAINTEXT = "ocr_plainText";
+    public final static String OCR_HOCR = "ocr_hocr";
    
 }

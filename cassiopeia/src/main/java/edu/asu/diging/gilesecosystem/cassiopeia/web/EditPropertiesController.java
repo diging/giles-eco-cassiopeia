@@ -31,14 +31,12 @@ public class EditPropertiesController {
     private IPropertiesManager propertyManager;
     
     Map<String, String> ocrTypeMap = new HashMap<>();
-    private String plainText = "plainText";
-    private String hOCR = "hOCR";
 
     @InitBinder
     protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder, WebDataBinder validateBinder) {
         validateBinder.addValidators(new SystemConfigValidator());
-        ocrTypeMap.put(plainText, "Plain Text");
-        ocrTypeMap.put(hOCR, "HOCR");
+        ocrTypeMap.put(Properties.OCR_PLAINTEXT, propertyManager.getProperty(Properties.OCR_PLAINTEXT));
+        ocrTypeMap.put(Properties.OCR_HOCR, propertyManager.getProperty(Properties.OCR_HOCR));
     }
 
     @RequestMapping(value = "/admin/system/config", method = RequestMethod.GET)
@@ -49,14 +47,13 @@ public class EditPropertiesController {
         page.setBaseUrl(propertyManager.getProperty(Properties.BASE_URL));
 
         if(propertyManager.getProperty(Properties.TESSERACT_CREATE_HOCR).equalsIgnoreCase("true")) {
-            page.setOCRType(hOCR);
+            page.setOCRType(Properties.OCR_HOCR);
         } else {
-            page.setOCRType(plainText);
+            page.setOCRType(Properties.OCR_PLAINTEXT);
         }
         
         model.addAttribute("ocrTypes", ocrTypeMap);
         model.addAttribute("systemConfigPage", page);
-        model.addAttribute("selectedOCRType", page.getOCRType());
         return "admin/system/config";
     }
     
@@ -74,7 +71,7 @@ public class EditPropertiesController {
         Map<String, String> propertiesMap = new HashMap<String, String>();
         propertiesMap.put(Properties.GILES_ACCESS_TOKEN, systemConfigPage.getGilesAccessToken());
         propertiesMap.put(Properties.BASE_URL, systemConfigPage.getBaseUrl());
-        if(systemConfigPage.getOCRType().equals(hOCR)) {
+        if(systemConfigPage.getOCRType().equals(Properties.OCR_HOCR)) {
             propertiesMap.put(Properties.TESSERACT_CREATE_HOCR, "true");
         } else {
             propertiesMap.put(Properties.TESSERACT_CREATE_HOCR, "false");
