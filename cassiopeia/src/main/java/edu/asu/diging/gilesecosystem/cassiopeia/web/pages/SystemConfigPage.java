@@ -4,8 +4,8 @@ public class SystemConfigPage {
 
     private String baseUrl;
     private String gilesAccessToken;
-    private boolean createhOCR;
-    
+    private String OCRType;
+
     public String getBaseUrl() {
         return baseUrl;
     }
@@ -13,7 +13,7 @@ public class SystemConfigPage {
     public void setBaseUrl(String nepomukUrl) {
         this.baseUrl = nepomukUrl;
     }
-    
+
     public String getGilesAccessToken() {
         return gilesAccessToken;
     }
@@ -22,12 +22,12 @@ public class SystemConfigPage {
         this.gilesAccessToken = gilesAccessToken;
     }
 
-    public boolean isCreatehOCR() {
-        return createhOCR;
+    public String getOCRType() {
+        return OCRType;
     }
 
-    public void setCreatehOCR(boolean createhOCR) {
-        this.createhOCR = createhOCR;
+    public void setOCRType(String oCRType) {
+        OCRType = oCRType;
     }
 
 }

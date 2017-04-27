@@ -29,12 +29,12 @@
     </div>
 
     <div class="page-header">
-        <h3>Type of OCR Format</h3>
+        <h3>OCR Settings</h3>
     </div>
 
     <div class="form-group">
-        <label> <form:checkbox path="createhOCR" /> Create hOCR
-        </label>
+        <label for="name">OCR Type</label>
+        <form:select class="form-control" id="selectedOCRType" path="OCRType" items="${ocrTypes}"></form:select>
     </div>
 
     <button class="btn btn-primary btn-md pull-right" type="submit">Save
