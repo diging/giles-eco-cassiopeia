@@ -20,7 +20,8 @@
         <tomcat.server.id>TomcatServer</tomcat.server.id>
 
         <admin.password>admin</admin.password>
-
+        <pullrequest></pullrequest>
+        <buildNumber></buildNumber>
         <log.level>debug</log.level>
 
         <cassiopeia.baseDir></cassiopeia.baseDir>
