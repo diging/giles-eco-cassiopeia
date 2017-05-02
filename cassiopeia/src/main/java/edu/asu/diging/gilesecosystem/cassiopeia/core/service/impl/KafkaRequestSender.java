@@ -19,6 +19,8 @@ import edu.asu.diging.gilesecosystem.requests.RequestStatus;
 import edu.asu.diging.gilesecosystem.requests.exceptions.MessageCreationException;
 import edu.asu.diging.gilesecosystem.requests.impl.CompletedOCRRequest;
 import edu.asu.diging.gilesecosystem.requests.kafka.IRequestProducer;
+import edu.asu.diging.gilesecosystem.septemberutil.properties.MessageType;
+import edu.asu.diging.gilesecosystem.septemberutil.service.ISystemMessageHandler;
 import edu.asu.diging.gilesecosystem.util.properties.IPropertiesManager;
 
 @Service
@@ -34,7 +36,9 @@ public class KafkaRequestSender implements IKafkaRequestSender {
     
     @Autowired
     private IRequestProducer requestProducer;
-    
+
+    @Autowired
+    private ISystemMessageHandler messageHandler;
     
     @PostConstruct
     public void init() {
@@ -60,7 +64,7 @@ public class KafkaRequestSender implements IKafkaRequestSender {
         try {
             completedRequest = requestFactory.createRequest(requestId, info.getUploadId());
         } catch (InstantiationException | IllegalAccessException e) {
-            logger.error("Could not create request.", e);
+            messageHandler.handleMessage("Could not create request.", e, MessageType.ERROR);
             // this should never happen if used correctly
         }
         
@@ -77,7 +81,7 @@ public class KafkaRequestSender implements IKafkaRequestSender {
         try {
             requestProducer.sendRequest(completedRequest, propertyManager.getProperty(Properties.KAFKA_TOPIC_OCR_COMPLETE));
         } catch (MessageCreationException e) {
-            logger.error("Could not send message.", e);
+            messageHandler.handleMessage("Could not send message.", e, MessageType.ERROR);
         }
     }
     

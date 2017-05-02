@@ -21,6 +21,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import edu.asu.diging.gilesecosystem.cassiopeia.core.properties.Properties;
 import edu.asu.diging.gilesecosystem.cassiopeia.web.pages.SystemConfigPage;
 import edu.asu.diging.gilesecosystem.cassiopeia.web.validators.SystemConfigValidator;
+import edu.asu.diging.gilesecosystem.septemberutil.properties.MessageType;
+import edu.asu.diging.gilesecosystem.septemberutil.service.ISystemMessageHandler;
 import edu.asu.diging.gilesecosystem.util.exceptions.PropertiesStorageException;
 import edu.asu.diging.gilesecosystem.util.properties.IPropertiesManager;
 
@@ -29,7 +31,10 @@ public class EditPropertiesController {
     
     @Autowired
     private IPropertiesManager propertyManager;
-    
+
+    @Autowired
+    private ISystemMessageHandler messageHandler;
+
     Map<String, String> ocrTypeMap = new HashMap<>();
 
     @InitBinder
@@ -51,7 +56,7 @@ public class EditPropertiesController {
         } else {
             page.setOCRType(Properties.OCR_PLAINTEXT);
         }
-        
+
         model.addAttribute("ocrTypes", ocrTypeMap);
         model.addAttribute("systemConfigPage", page);
         return "admin/system/config";
@@ -83,6 +88,7 @@ public class EditPropertiesController {
             model.addAttribute("show_alert", true);
             model.addAttribute("alert_type", "danger");
             model.addAttribute("alert_msg", "An unexpected error occurred. System Configuration could not be saved.");
+            messageHandler.handleMessage("An unexpected error occurred. System Configuration could not be saved.", e, MessageType.ERROR);
             return "admin/system/config";
         }
         

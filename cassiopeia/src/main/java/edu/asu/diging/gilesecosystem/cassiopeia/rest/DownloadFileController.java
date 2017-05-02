@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.asu.diging.gilesecosystem.septemberutil.properties.MessageType;
+import edu.asu.diging.gilesecosystem.septemberutil.service.ISystemMessageHandler;
 import edu.asu.diging.gilesecosystem.util.files.IFileStorageManager;
 
 @RestController
@@ -29,6 +31,9 @@ public class DownloadFileController {
    
     @Autowired
     private IFileStorageManager storageManager;
+
+    @Autowired
+    private ISystemMessageHandler messageHandler;
 
     @RequestMapping(value = GET_FILE_URL)
     public ResponseEntity<String> getFile(
@@ -58,7 +63,7 @@ public class DownloadFileController {
             response.getOutputStream().write(content);
             response.getOutputStream().close();
         } catch (IOException e) {
-            logger.error("Could not write to output stream.", e);
+            messageHandler.handleMessage("Could not write to output stream.", e, MessageType.ERROR);
             return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
