@@ -15,5 +15,7 @@ public interface Properties {
 
     public final static String OCR_PLAINTEXT = "ocr_plainText";
     public final static String OCR_HOCR = "ocr_hocr";
-   
+
+    public final static String APPLICATION_ID = "application_id";
+
 }
