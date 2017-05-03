@@ -283,7 +283,7 @@ public class TesseractOCRParser extends AbstractParser {
 
         } catch (ExecutionException e) {
             // should not be thrown
-            messageHandler.handleMessage("Exceution Exception", e, MessageType.ERROR);
+            messageHandler.handleMessage("TesseractOCRParser attempting to retrive result of aborted task.", e, MessageType.ERROR);
         } catch (TimeoutException e) {
             waitThread.interrupt();
             process.destroy();
@@ -335,7 +335,7 @@ public class TesseractOCRParser extends AbstractParser {
                     for (int n = reader.read(buffer); n != -1; n = reader.read(buffer))
                         out.append(buffer, 0, n);
                 } catch (IOException e) {
-                    messageHandler.handleMessage("IOException", e, MessageType.ERROR);
+                    messageHandler.handleMessage("Could not read input stream.", e, MessageType.ERROR);
                 } finally {
                     IOUtils.closeQuietly(stream);
                 }

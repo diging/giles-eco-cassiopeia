@@ -88,7 +88,7 @@ public class EditPropertiesController {
             model.addAttribute("show_alert", true);
             model.addAttribute("alert_type", "danger");
             model.addAttribute("alert_msg", "An unexpected error occurred. System Configuration could not be saved.");
-            messageHandler.handleMessage("An unexpected error occurred. System Configuration could not be saved.", e, MessageType.ERROR);
+            messageHandler.handleMessage("Error while updating System Configuration. System Configuration could not be saved.", e, MessageType.ERROR);
             return "admin/system/config";
         }
         
