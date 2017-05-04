@@ -58,8 +58,12 @@ import org.apache.tika.parser.image.ImageParser;
 import org.apache.tika.parser.image.TiffParser;
 import org.apache.tika.parser.jpeg.JpegParser;
 import org.apache.tika.sax.XHTMLContentHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
+
+import edu.asu.diging.gilesecosystem.septemberutil.properties.MessageType;
+import edu.asu.diging.gilesecosystem.septemberutil.service.ISystemMessageHandler;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -78,6 +82,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  *
  */
 public class TesseractOCRParser extends AbstractParser {
+
+    @Autowired
+    private ISystemMessageHandler messageHandler;
+
     private static final long serialVersionUID = -8167538283213097265L;
     private static final TesseractOCRConfig DEFAULT_CONFIG = new TesseractOCRConfig();
     private static final Set<MediaType> SUPPORTED_TYPES = Collections.unmodifiableSet(
@@ -275,7 +283,7 @@ public class TesseractOCRParser extends AbstractParser {
 
         } catch (ExecutionException e) {
             // should not be thrown
-
+            messageHandler.handleMessage("TesseractOCRParser attempting to retrive result of aborted task.", e, MessageType.ERROR);
         } catch (TimeoutException e) {
             waitThread.interrupt();
             process.destroy();
@@ -327,7 +335,7 @@ public class TesseractOCRParser extends AbstractParser {
                     for (int n = reader.read(buffer); n != -1; n = reader.read(buffer))
                         out.append(buffer, 0, n);
                 } catch (IOException e) {
-
+                    messageHandler.handleMessage("Could not read input stream.", e, MessageType.ERROR);
                 } finally {
                     IOUtils.closeQuietly(stream);
                 }

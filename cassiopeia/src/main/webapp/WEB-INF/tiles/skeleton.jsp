@@ -39,8 +39,8 @@
     <![endif]-->
     
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
- 	<script src="<c:url value="/resources/bootstrap/js/bootstrap.min.js" />"></script>
-	<script src="<c:url value="/resources/bootstrap/js/main.js" />"></script>
+     <script src="<c:url value="/resources/bootstrap/js/bootstrap.min.js" />"></script>
+    <script src="<c:url value="/resources/bootstrap/js/main.js" />"></script>
   </head>
 
   <body>
@@ -50,25 +50,25 @@
       <nav>
           <ul class="nav nav-pills pull-right">
           <li role="presentation">
-          		<a href="<c:url value="/" />" >Home</a>
-          	</li>
-          	
-          	<sec:authorize access="hasRole('ROLE_ADMIN')">
-				<li role="presentation"><a
-					href="<c:url value="/admin/system/config" />">System Config</a>
-				</li>
-				<li role="presentation">
-				    <a href="<c:url value="/admin/requests" />">Requests</a>
-				</li>
-			</sec:authorize>
-          	
-          	<sec:authorize access="isAuthenticated()">
-          	<li role="presentation">
-         	 	<form action="<c:url value="/logout" />" method="POST">
-         	 	<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-  				<button class="btn-link" type="submit" title="Logout"><i class="fa fa-sign-out" aria-hidden="true"></i> Logout</button>
-         	 	</form>
-         	 </li>
+                  <a href="<c:url value="/" />" >Home</a>
+              </li>
+
+              <sec:authorize access="hasRole('ROLE_ADMIN')">
+                <li role="presentation"><a
+                    href="<c:url value="/admin/system/config" />">System Config</a>
+                </li>
+                <li role="presentation">
+                    <a href="<c:url value="/admin/requests" />">Requests</a>
+                </li>
+            </sec:authorize>
+
+              <sec:authorize access="isAuthenticated()">
+              <li role="presentation">
+                  <form action="<c:url value="/logout" />" method="POST">
+                  <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                  <button class="btn-link" type="submit" title="Logout"><i class="fa fa-sign-out" aria-hidden="true"></i> Logout</button>
+                  </form>
+              </li>
           </sec:authorize>
           </ul>
          
@@ -79,9 +79,9 @@
       </div>
       
       
-	  <c:if test="${show_alert}" >
-	  <div class="alert alert-${alert_type}" role="alert">${alert_msg}</div>
-	  </c:if>
+      <c:if test="${show_alert}" >
+      <div class="alert alert-${alert_type}" role="alert">${alert_msg}</div>
+      </c:if>
       <tiles:insertAttribute name="content" />
 
     </div> <!-- /container -->
@@ -91,22 +91,24 @@
       
         <div class="row">
         <div class="col-md-12">
-		<hr style="margin-bottom: 25px;">
-		<p class="text-muted pull-left">
-		
-	    <p class="text-muted">
-	    
-	         
-	   	<sec:authorize access="isAnonymous()">
-	   	
-		<form name='f' class="form-inline pull-right" action="<c:url value="/login/authenticate" />" method="POST">
-			Login:
-			<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-  			<input placeholder="Username" class="form-control input-sm" type="text" id="username" name="username"/>        
-		    <input placeholder="Password" class="form-control input-sm" type="password" id="password" name="password"/>    
-		    <button type="submit" class="btn btn-default btn-sm">Log in</button>
-		</form>
-		</sec:authorize>
+        <hr style="margin-bottom: 25px;">
+        <p class="text-muted pull-left">
+        <c:set var="PR" value="${pullrequest}" />
+            Version: ${buildNumber}<c:if test="${not empty PR}">, Pull Request: ${pullrequest}</c:if>
+        </p>
+        <p class="text-muted">
+
+
+        <sec:authorize access="isAnonymous()">
+
+        <form name='f' class="form-inline pull-right" action="<c:url value="/login/authenticate" />" method="POST">
+            Login:
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+              <input placeholder="Username" class="form-control input-sm" type="text" id="username" name="username"/>
+            <input placeholder="Password" class="form-control input-sm" type="password" id="password" name="password"/>
+            <button type="submit" class="btn btn-default btn-sm">Log in</button>
+        </form>
+        </sec:authorize>
         </p>
         </div>
         </div>

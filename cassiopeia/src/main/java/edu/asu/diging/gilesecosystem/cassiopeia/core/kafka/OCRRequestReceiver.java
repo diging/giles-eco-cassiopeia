@@ -13,6 +13,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.asu.diging.gilesecosystem.cassiopeia.core.service.IOCRManager;
 import edu.asu.diging.gilesecosystem.requests.IOCRRequest;
 import edu.asu.diging.gilesecosystem.requests.impl.OCRRequest;
+import edu.asu.diging.gilesecosystem.septemberutil.properties.MessageType;
+import edu.asu.diging.gilesecosystem.septemberutil.service.ISystemMessageHandler;
 
 @PropertySource("classpath:/config.properties")
 public class OCRRequestReceiver {
@@ -21,6 +23,9 @@ public class OCRRequestReceiver {
     
     @Autowired
     private IOCRManager ocrManager;
+
+    @Autowired
+    private ISystemMessageHandler messageHandler;
     
     @KafkaListener(id="cassiopeia.ocr", topics = "${topic_ocr_request}")
     public void receiveMessage(String message) {
@@ -29,7 +34,7 @@ public class OCRRequestReceiver {
         try {
             request = mapper.readValue(message, OCRRequest.class);
         } catch (IOException e) {
-            logger.error("Could not unmarshall request.", e);
+            messageHandler.handleMessage("Could not unmarshall request.", e, MessageType.ERROR);
             // FIXME: handle this case
             return;
         }

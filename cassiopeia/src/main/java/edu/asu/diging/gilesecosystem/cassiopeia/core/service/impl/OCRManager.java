@@ -33,6 +33,8 @@ import edu.asu.diging.gilesecosystem.cassiopeia.core.properties.Properties;
 import edu.asu.diging.gilesecosystem.cassiopeia.core.service.IKafkaRequestSender;
 import edu.asu.diging.gilesecosystem.cassiopeia.core.service.IOCRManager;
 import edu.asu.diging.gilesecosystem.requests.IOCRRequest;
+import edu.asu.diging.gilesecosystem.septemberutil.properties.MessageType;
+import edu.asu.diging.gilesecosystem.septemberutil.service.ISystemMessageHandler;
 import edu.asu.diging.gilesecosystem.util.files.IFileStorageManager;
 import edu.asu.diging.gilesecosystem.util.properties.IPropertiesManager;
 
@@ -51,6 +53,8 @@ public class OCRManager implements IOCRManager {
     @Autowired
     private IKafkaRequestSender kafkaRequestSender;
 
+    @Autowired
+    private ISystemMessageHandler messageHandler;
 
     /* (non-Javadoc)
      * @see edu.asu.diging.gilesecosystem.cassiopeia.core.service.impl.IOCRManager#processOCRRequest(edu.asu.diging.gilesecosystem.requests.IOCRRequest)
@@ -81,7 +85,7 @@ public class OCRManager implements IOCRManager {
             ocrParser.parse(stream, handler, metadata, parseContext);
             ocrResult = handler.toString();
         } catch (SAXException | TikaException | IOException e) {
-            logger.error("Error during ocr.", e);
+            messageHandler.handleMessage("Error during ocr.", e, MessageType.ERROR);
             // FIXME: send to monitoring app
         }
         
@@ -129,7 +133,7 @@ public class OCRManager implements IOCRManager {
         try {
             fileObject.createNewFile();
         } catch (IOException e) {
-            logger.error("Could not create file.", e);
+            messageHandler.handleMessage("Could not create file.", e, MessageType.ERROR);
             return null;
         }
 
@@ -140,7 +144,7 @@ public class OCRManager implements IOCRManager {
             bfWriter.close();
             writer.close();
         } catch (IOException e) {
-            logger.error("Could not write text to file.", e);
+            messageHandler.handleMessage("Could not write text to file.", e, MessageType.ERROR);
             return null;
         }
 
