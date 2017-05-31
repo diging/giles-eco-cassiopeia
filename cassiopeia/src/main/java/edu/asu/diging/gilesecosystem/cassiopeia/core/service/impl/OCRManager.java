@@ -73,6 +73,8 @@ public class OCRManager implements IOCRManager {
         TesseractOCRConfig config = new TesseractOCRConfig();
         config.setTesseractPath(tesseractBin);
         config.setTessdataPath(tesseractData);
+        config.setTimeout(new Integer(propertyManager.getProperty(Properties.TESSERACT_TIMEOUT)));
+        
         ParseContext parseContext = new ParseContext();
         parseContext.set(TesseractOCRConfig.class, config);
         TesseractOCRParser ocrParser = new TesseractOCRParser(createHocr);
