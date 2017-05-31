@@ -8,6 +8,7 @@ public interface Properties {
     public final static String TESSERACT_BIN_FOLDER = "tesseract_bin_folder";
     public final static String TESSERACT_DATA_FOLDER = "tesseract_data_folder";
     public final static String TESSERACT_CREATE_HOCR = "tesseract_create_hocr";
+    public final static String TESSERACT_TIMEOUT = "tesseract_timeout";
     
     public final static String GILES_ACCESS_TOKEN = "giles_access_token";
     
