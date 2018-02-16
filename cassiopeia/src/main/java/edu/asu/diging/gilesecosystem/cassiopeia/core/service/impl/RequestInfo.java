@@ -1,5 +1,7 @@
 package edu.asu.diging.gilesecosystem.cassiopeia.core.service.impl;
 
+import edu.asu.diging.gilesecosystem.requests.RequestStatus;
+
 public class RequestInfo {
 
     private String path;
@@ -8,6 +10,8 @@ public class RequestInfo {
     private String imageFilename;
     private String uploadId;
     private String fileId;
+    private RequestStatus status;
+    private String errorMsg;
     
     public RequestInfo(String path, long size, String imageFilename, String filename) {
         this.path = path;
@@ -62,6 +66,22 @@ public class RequestInfo {
 
     public void setFilename(String filename) {
         this.filename = filename;
+    }
+
+    public RequestStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(RequestStatus status) {
+        this.status = status;
+    }
+
+    public String getErrorMsg() {
+        return errorMsg;
+    }
+
+    public void setErrorMsg(String errorMsg) {
+        this.errorMsg = errorMsg;
     }
     
     

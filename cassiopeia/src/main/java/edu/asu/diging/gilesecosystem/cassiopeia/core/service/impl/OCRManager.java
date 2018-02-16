@@ -33,6 +33,7 @@ import edu.asu.diging.gilesecosystem.cassiopeia.core.properties.Properties;
 import edu.asu.diging.gilesecosystem.cassiopeia.core.service.IKafkaRequestSender;
 import edu.asu.diging.gilesecosystem.cassiopeia.core.service.IOCRManager;
 import edu.asu.diging.gilesecosystem.requests.IOCRRequest;
+import edu.asu.diging.gilesecosystem.requests.RequestStatus;
 import edu.asu.diging.gilesecosystem.septemberutil.properties.MessageType;
 import edu.asu.diging.gilesecosystem.septemberutil.service.ISystemMessageHandler;
 import edu.asu.diging.gilesecosystem.util.files.IFileStorageManager;
@@ -82,18 +83,23 @@ public class OCRManager implements IOCRManager {
         Metadata metadata = new Metadata();
         BodyContentHandler handler = new BodyContentHandler();
         
-        String ocrResult = null;
+        RequestInfo info = null;
         try (InputStream stream = new ByteArrayInputStream(image)) {
             ocrParser.parse(stream, handler, metadata, parseContext);
-            ocrResult = handler.toString();
+            String ocrResult = handler.toString();
+            info = saveTextToFile(request.getRequestId(), request.getDocumentId(), ocrResult, request.getFilename(), ".txt");
+            info.setUploadId(request.getUploadId());
+            info.setFileId(request.getFileId());
+            info.setStatus(RequestStatus.COMPLETE);
         } catch (SAXException | TikaException | IOException e) {
             messageHandler.handleMessage("Error during ocr.", e, MessageType.ERROR);
-            // FIXME: send to monitoring app
+            info = new RequestInfo(null, 0, null, null);
+            info.setUploadId(request.getUploadId());
+            info.setFileId(request.getFileId());
+            info.setStatus(RequestStatus.FAILED);
+            info.setErrorMsg(e.getMessage());
         }
         
-        RequestInfo info = saveTextToFile(request.getRequestId(), request.getDocumentId(), ocrResult, request.getFilename(), ".txt");
-        info.setUploadId(request.getUploadId());
-        info.setFileId(request.getFileId());
         
         kafkaRequestSender.sendRequest(request.getRequestId(), request.getDocumentId(), info);
     }

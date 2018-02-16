@@ -30,59 +30,73 @@ public class KafkaRequestSender implements IKafkaRequestSender {
 
     @Autowired
     private IPropertiesManager propertyManager;
-    
+
     @Autowired
     private IRequestFactory<ICompletedOCRRequest, CompletedOCRRequest> requestFactory;
-    
+
     @Autowired
     private IRequestProducer requestProducer;
 
     @Autowired
     private ISystemMessageHandler messageHandler;
-    
+
     @PostConstruct
     public void init() {
         requestFactory.config(CompletedOCRRequest.class);
     }
 
-    /* (non-Javadoc)
-     * @see edu.asu.diging.gilesecosystem.cassiopeia.core.service.impl.IKafkaRequestSender#sendRequest(java.lang.String, java.lang.String, java.lang.String, java.lang.String, edu.asu.diging.gilesecosystem.cassiopeia.core.service.impl.RequestInfo)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see edu.asu.diging.gilesecosystem.cassiopeia.core.service.impl.
+     * IKafkaRequestSender#sendRequest(java.lang.String, java.lang.String,
+     * java.lang.String, java.lang.String,
+     * edu.asu.diging.gilesecosystem.cassiopeia.core.service.impl.RequestInfo)
      */
     @Override
     public void sendRequest(String requestId, String documentId, RequestInfo info) {
         String restEndpoint = propertyManager.getProperty(Properties.BASE_URL);
         if (restEndpoint.endsWith("/")) {
-            restEndpoint = restEndpoint.substring(0, restEndpoint.length()-1);
+            restEndpoint = restEndpoint.substring(0, restEndpoint.length() - 1);
         }
-        
-        String fileEndpoint = restEndpoint + DownloadFileController.GET_FILE_URL
-                .replace(DownloadFileController.REQUEST_ID_PLACEHOLDER, requestId)
-                .replace(DownloadFileController.DOCUMENT_ID_PLACEHOLDER, documentId)
-                .replace(DownloadFileController.FILENAME_PLACEHOLDER, info.getFilename());
-        
+
+        String fileEndpoint = null;
+
+        if (info.getStatus() == RequestStatus.COMPLETE) {
+            fileEndpoint = restEndpoint + DownloadFileController.GET_FILE_URL
+                    .replace(DownloadFileController.REQUEST_ID_PLACEHOLDER, requestId)
+                    .replace(DownloadFileController.DOCUMENT_ID_PLACEHOLDER, documentId)
+                    .replace(DownloadFileController.FILENAME_PLACEHOLDER,
+                            info.getFilename());
+        }
+
         ICompletedOCRRequest completedRequest = null;
         try {
-            completedRequest = requestFactory.createRequest(requestId, info.getUploadId());
+            completedRequest = requestFactory.createRequest(requestId,
+                    info.getUploadId());
         } catch (InstantiationException | IllegalAccessException e) {
-            messageHandler.handleMessage("Could not create request.", e, MessageType.ERROR);
+            messageHandler.handleMessage("Could not create request.", e,
+                    MessageType.ERROR);
             // this should never happen if used correctly
         }
-        
+
         completedRequest.setDocumentId(documentId);
         completedRequest.setDownloadPath(info.getPath());
         completedRequest.setSize(info.getSize());
         completedRequest.setDownloadUrl(fileEndpoint);
         completedRequest.setFilename(info.getImageFilename());
         completedRequest.setFileId(info.getFileId());
-        completedRequest.setStatus(RequestStatus.COMPLETE);
+        completedRequest.setStatus(info.getStatus());
+        completedRequest.setErrorMsg(info.getErrorMsg());
         completedRequest.setOcrDate(OffsetDateTime.now(ZoneId.of("UTC")).toString());
         completedRequest.setTextFilename(info.getFilename());
-        
+
         try {
-            requestProducer.sendRequest(completedRequest, propertyManager.getProperty(Properties.KAFKA_TOPIC_OCR_COMPLETE));
+            requestProducer.sendRequest(completedRequest,
+                    propertyManager.getProperty(Properties.KAFKA_TOPIC_OCR_COMPLETE));
         } catch (MessageCreationException e) {
             messageHandler.handleMessage("Could not send message.", e, MessageType.ERROR);
         }
     }
-    
+
 }
