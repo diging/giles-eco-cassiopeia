@@ -56,7 +56,8 @@ public class RequestResender implements IRequestResender {
                     String imageFilename = textFile.getName();
                     imageFilename = imageFilename.substring(0, imageFilename.lastIndexOf("."));
                     
-                    RequestInfo info = new RequestInfo(relativePath + File.separator + textFile.getName(), textFile.length(), imageFilename, textFile.getName());
+                    RequestInfo info = new RequestInfo(relativePath + File.separator + textFile.getName(), textFile.length(), textFile.getName());
+                    info.setImageFilename(imageFilename);
                     kafkaRequestSender.sendRequest(requestId, docId, info);
                     requestCounter++;
                 }
