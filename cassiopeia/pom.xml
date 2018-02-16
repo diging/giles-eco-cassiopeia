@@ -35,7 +35,7 @@
         <tesseract.bin></tesseract.bin>
         <tesseract.data></tesseract.data>
         <tesseract.create.hocr>false</tesseract.create.hocr>
-        <tesseract.timeout>1</tesseract.timeout>
+        <tesseract.timeout>600</tesseract.timeout>
     </properties>
 
     <dependencies>
