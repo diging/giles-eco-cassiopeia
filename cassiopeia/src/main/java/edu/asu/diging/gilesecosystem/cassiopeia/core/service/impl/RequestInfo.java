@@ -13,11 +13,10 @@ public class RequestInfo {
     private RequestStatus status;
     private String errorMsg;
     
-    public RequestInfo(String path, long size, String imageFilename, String filename) {
+    public RequestInfo(String path, long size, String filename) {
         this.path = path;
         this.size = size;
         this.filename = filename;
-        this.imageFilename = imageFilename;
     }
 
     public String getPath() {

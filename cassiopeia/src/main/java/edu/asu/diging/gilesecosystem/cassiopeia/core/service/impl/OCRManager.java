@@ -91,13 +91,15 @@ public class OCRManager implements IOCRManager {
             info.setUploadId(request.getUploadId());
             info.setFileId(request.getFileId());
             info.setStatus(RequestStatus.COMPLETE);
+            info.setImageFilename(request.getFilename());
         } catch (SAXException | TikaException | IOException e) {
             messageHandler.handleMessage("Error during ocr.", e, MessageType.ERROR);
-            info = new RequestInfo(null, 0, null, null);
+            info = new RequestInfo(null, 0, null);
             info.setUploadId(request.getUploadId());
             info.setFileId(request.getFileId());
             info.setStatus(RequestStatus.FAILED);
             info.setErrorMsg(e.getMessage());
+            info.setImageFilename(request.getFilename());
         }
         
         
@@ -133,7 +135,6 @@ public class OCRManager implements IOCRManager {
         if (!fileExtentions.startsWith(".")) {
             fileExtentions = "." + fileExtentions;
         }
-        String imageFilename = filename;
         filename = filename + fileExtentions;
 
         String filePath = docFolder + File.separator + filename;
@@ -157,6 +158,6 @@ public class OCRManager implements IOCRManager {
         }
 
         String relativePath = storageManager.getFileFolderPathInBaseFolder(requestId, documentId, null);
-        return new RequestInfo(relativePath + File.separator + filename, fileObject.length(), imageFilename, filename);
+        return new RequestInfo(relativePath + File.separator + filename, fileObject.length(), filename);
     }
 }
