@@ -57,10 +57,10 @@
             <version>${geco.september.util.version}</version>
         </dependency>
         <dependency>
-        		<groupId>edu.asu.diging.giles-eco</groupId>
-        		<artifactId>kafka-util</artifactId>
-        		<version>${geco.kafka-util.version}</version>
-        	</dependency>
+        	<groupId>edu.asu.diging.giles-eco</groupId>
+        	<artifactId>kafka-util</artifactId>
+        	<version>${geco.kafka-util.version}</version>
+        </dependency>
 
 
         <!-- Spring -->
