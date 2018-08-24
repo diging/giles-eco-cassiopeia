@@ -37,6 +37,10 @@
         <tesseract.data></tesseract.data>
         <tesseract.create.hocr>false</tesseract.create.hocr>
         <tesseract.timeout>600</tesseract.timeout>
+        
+        <!-- Zookeeper -->
+        <zookeeper.host>localhost</zookeeper.host>
+        <zookeeper.port>2181</zookeeper.port>
     </properties>
 
     <dependencies>
