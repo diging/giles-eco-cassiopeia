@@ -41,126 +41,123 @@ import edu.asu.diging.gilesecosystem.util.properties.IPropertiesManager;
 
 @Service
 public class OCRManager implements IOCRManager {
-
+	
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	@Autowired
-	@Qualifier("fileStorageManager")
-	private IFileStorageManager storageManager;
+@Autowired
+@Qualifier("fileStorageManager")
+private IFileStorageManager storageManager;
 
-	@Autowired
-	private IPropertiesManager propertyManager;
+@Autowired
+private IPropertiesManager propertyManager;
 
-	@Autowired
-	private IKafkaRequestSender kafkaRequestSender;
+@Autowired
+private IKafkaRequestSender kafkaRequestSender;
 
-	@Autowired
-	private ISystemMessageHandler messageHandler;
+@Autowired
+private ISystemMessageHandler messageHandler;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see edu.asu.diging.gilesecosystem.cassiopeia.core.service.impl.IOCRManager#
-	 * processOCRRequest(edu.asu.diging.gilesecosystem.requests.IOCRRequest)
-	 */
-	@Override
-	public void processOCRRequest(IOCRRequest request) {
+/* (non-Javadoc)
+ * @see edu.asu.diging.gilesecosystem.cassiopeia.core.service.impl.IOCRManager#processOCRRequest(edu.asu.diging.gilesecosystem.requests.IOCRRequest)
+ */
+@Override
+public void processOCRRequest(IOCRRequest request) {
 
-		storageManager.getAndCreateStoragePath(request.getRequestId(), request.getDocumentId(), null);
-		byte[] image = downloadFile(request.getDownloadUrl());
+    storageManager.getAndCreateStoragePath(request.getRequestId(),
+            request.getDocumentId(), null);
+    byte[] image = downloadFile(request.getDownloadUrl());
+    
+    String tesseractBin = propertyManager.getProperty(Properties.TESSERACT_BIN_FOLDER);
+    String tesseractData = propertyManager.getProperty(Properties.TESSERACT_DATA_FOLDER);
+    boolean createHocr = propertyManager.getProperty(Properties.TESSERACT_CREATE_HOCR).equalsIgnoreCase("true");
+    
+    TesseractOCRConfig config = new TesseractOCRConfig();
+    config.setTesseractPath(tesseractBin);
+    config.setTessdataPath(tesseractData);
+    config.setTimeout(new Integer(propertyManager.getProperty(Properties.TESSERACT_TIMEOUT)));
+    
+    ParseContext parseContext = new ParseContext();
+    parseContext.set(TesseractOCRConfig.class, config);
+    TesseractOCRParser ocrParser = new TesseractOCRParser(createHocr);
+    
+    Metadata metadata = new Metadata();
+    BodyContentHandler handler = new BodyContentHandler();
+    
+    RequestInfo info = null;
+    try (InputStream stream = new ByteArrayInputStream(image)) {
+        ocrParser.parse(stream, handler, metadata, parseContext);
+        String ocrResult = handler.toString();
+        info = saveTextToFile(request.getRequestId(), request.getDocumentId(), ocrResult, request.getFilename(), ".txt");
+        info.setUploadId(request.getUploadId());
+        info.setFileId(request.getFileId());
+        info.setStatus(RequestStatus.COMPLETE);
+        info.setImageFilename(request.getFilename());
+    } catch (SAXException | TikaException | IOException e) {
+        messageHandler.handleMessage("Error during ocr.", e, MessageType.ERROR);
+        info = new RequestInfo(null, 0, null);
+        info.setUploadId(request.getUploadId());
+        info.setFileId(request.getFileId());
+        info.setStatus(RequestStatus.FAILED);
+        info.setErrorMsg(e.getMessage());
+        info.setImageFilename(request.getFilename());
+    }
+    
+    
+    kafkaRequestSender.sendRequest(request.getRequestId(), request.getDocumentId(), info);
+}
 
-		String tesseractBin = propertyManager.getProperty(Properties.TESSERACT_BIN_FOLDER);
-		String tesseractData = propertyManager.getProperty(Properties.TESSERACT_DATA_FOLDER);
-		boolean createHocr = propertyManager.getProperty(Properties.TESSERACT_CREATE_HOCR).equalsIgnoreCase("true");
+private byte[] downloadFile(String url) {
+    RestTemplate restTemplate = new RestTemplate();
+    restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
 
-		TesseractOCRConfig config = new TesseractOCRConfig();
-		config.setTesseractPath(tesseractBin);
-		config.setTessdataPath(tesseractData);
-		config.setTimeout(new Integer(propertyManager.getProperty(Properties.TESSERACT_TIMEOUT)));
+    HttpHeaders headers = new HttpHeaders();
+    headers.setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM));
+    headers.set(
+            "Authorization",
+            "token "
+                    + propertyManager
+                            .getProperty(Properties.GILES_ACCESS_TOKEN));
+    HttpEntity<String> entity = new HttpEntity<String>(headers);
 
-		ParseContext parseContext = new ParseContext();
-		parseContext.set(TesseractOCRConfig.class, config);
-		TesseractOCRParser ocrParser = new TesseractOCRParser(createHocr);
+    ResponseEntity<byte[]> response = restTemplate.exchange(url, HttpMethod.GET,
+            entity, byte[].class);
+    if (response.getStatusCode().equals(HttpStatus.OK)) {
+        return response.getBody();
+    }
+    return null;
+}
 
-		Metadata metadata = new Metadata();
-		BodyContentHandler handler = new BodyContentHandler();
+protected RequestInfo saveTextToFile(String requestId,
+        String documentId, String pageText, String filename, String fileExtentions) {
+    String docFolder = storageManager.getAndCreateStoragePath(requestId,
+            documentId, null);
 
-		RequestInfo info = null;
-		try (InputStream stream = new ByteArrayInputStream(image)) {
-			ocrParser.parse(stream, handler, metadata, parseContext);
-			String ocrResult = handler.toString();
-			info = saveTextToFile(request.getRequestId(), request.getDocumentId(), ocrResult, request.getFilename(),
-					".txt");
-			info.setUploadId(request.getUploadId());
-			info.setFileId(request.getFileId());
-			info.setStatus(RequestStatus.COMPLETE);
-			info.setImageFilename(request.getFilename());
-		} catch (SAXException | TikaException | IOException e) {
-			messageHandler.handleMessage("Error during ocr.", e, MessageType.ERROR);
-			info = new RequestInfo(null, 0, null);
-			info.setUploadId(request.getUploadId());
-			info.setFileId(request.getFileId());
-			info.setStatus(RequestStatus.FAILED);
-			info.setErrorMsg(e.getMessage());
-			info.setImageFilename(request.getFilename());
-		}
+    if (!fileExtentions.startsWith(".")) {
+        fileExtentions = "." + fileExtentions;
+    }
+    filename = filename + fileExtentions;
 
-		kafkaRequestSender.sendRequest(request.getRequestId(), request.getDocumentId(), info);
-	}
+    String filePath = docFolder + File.separator + filename;
+    File fileObject = new File(filePath);
+    try {
+        fileObject.createNewFile();
+    } catch (IOException e) {
+        messageHandler.handleMessage("Could not create file.", e, MessageType.ERROR);
+        return null;
+    }
 
-	private byte[] downloadFile(String url) {
-		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
+    try {
+        FileWriter writer = new FileWriter(fileObject);
+        BufferedWriter bfWriter = new BufferedWriter(writer);
+        bfWriter.write(pageText);
+        bfWriter.close();
+        writer.close();
+    } catch (IOException e) {
+        messageHandler.handleMessage("Could not write text to file.", e, MessageType.ERROR);
+        return null;
+    }
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM));
-		headers.set("Authorization", "token " + propertyManager.getProperty(Properties.GILES_ACCESS_TOKEN));
-		HttpEntity<String> entity = new HttpEntity<String>(headers);
-
-		ResponseEntity<byte[]> response = restTemplate.exchange(url, HttpMethod.GET, entity, byte[].class);
-		if (response.getStatusCode().equals(HttpStatus.OK)) {
-			return response.getBody();
-		}
-		return null;
-	}
-
-	protected RequestInfo saveTextToFile(String requestId, String documentId, String pageText, String filename,
-			String fileExtentions) {
-
-		String docFolder = storageManager.getAndCreateStoragePath(requestId, documentId, null);
-
-		if (!fileExtentions.startsWith(".")) {
-			fileExtentions = "." + fileExtentions;
-
-		}
-
-		filename = filename + fileExtentions;
-
-		String filePath = docFolder + File.separator + filename;
-
-		File fileObject = new File(filePath);
-		try {
-			fileObject.createNewFile();
-
-		} catch (IOException e) {
-			messageHandler.handleMessage("Could not create file.", e, MessageType.ERROR);
-			return null;
-		}
-
-		try {
-			FileWriter writer = new FileWriter(fileObject);
-			BufferedWriter bfWriter = new BufferedWriter(writer);
-			bfWriter.write(pageText);
-			bfWriter.close();
-			writer.close();
-
-		} catch (IOException e) {
-			messageHandler.handleMessage("Could not write text to file.", e, MessageType.ERROR);
-			return null;
-		}
-
-		String relativePath = storageManager.getFileFolderPathInBaseFolder(requestId, documentId, null);
-
-		return new RequestInfo(relativePath + File.separator + filename, fileObject.length(), filename);
-	}
+    String relativePath = storageManager.getFileFolderPathInBaseFolder(requestId, documentId, null);
+    return new RequestInfo(relativePath + File.separator + filename, fileObject.length(), filename);
+}
 }

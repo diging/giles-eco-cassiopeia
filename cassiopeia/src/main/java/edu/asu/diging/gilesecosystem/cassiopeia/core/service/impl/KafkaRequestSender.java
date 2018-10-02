@@ -56,6 +56,7 @@ public class KafkaRequestSender implements IKafkaRequestSender {
     @Override
     public void sendRequest(String requestId, String documentId, RequestInfo info) {
         String restEndpoint = propertyManager.getProperty(Properties.BASE_URL);
+        StringBuffer errorMsgs;
         if (restEndpoint.endsWith("/")) {
             restEndpoint = restEndpoint.substring(0, restEndpoint.length() - 1);
         }
@@ -90,24 +91,21 @@ public class KafkaRequestSender implements IKafkaRequestSender {
         completedRequest.setErrorMsg(info.getErrorMsg());
         completedRequest.setOcrDate(OffsetDateTime.now(ZoneId.of("UTC")).toString());
         completedRequest.setTextFilename(info.getFilename());
-        
-		// check for null value in url
-		if (fileEndpoint == null || fileEndpoint.contains("null")) {
-			StringBuffer str = new StringBuffer(info.getErrorMsg());
+       
+		if ((fileEndpoint == null) || (fileEndpoint.contains("null"))) { // check for null value in url
+			errorMsgs = new StringBuffer(info.getErrorMsg());
 
-			if (str.length() != 0) {
-				if (!str.toString().endsWith("."))
-					str.append(".");
-				str.append("Also,");
+			if (errorMsgs.length() != 0) {
+				if (!errorMsgs.toString().endsWith(".")) {
+					errorMsgs.append(".");
+				}
+			   errorMsgs.append("Also,");
 			}
-			str.append("File End Point is null or having null component vales in URL");
+			errorMsgs.append("File End Point is null or having null component vales in URL");
 
-			completedRequest.setErrorMsg(str.toString());
+			completedRequest.setErrorMsg(errorMsgs.toString());
 			completedRequest.setStatus(RequestStatus.FAILED);
-
 		}
-        
-
         try {
             requestProducer.sendRequest(completedRequest,
                     propertyManager.getProperty(Properties.KAFKA_TOPIC_OCR_COMPLETE));
