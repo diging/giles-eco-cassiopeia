@@ -56,6 +56,7 @@ public class KafkaRequestSender implements IKafkaRequestSender {
     @Override
     public void sendRequest(String requestId, String documentId, RequestInfo info) {
         String restEndpoint = propertyManager.getProperty(Properties.BASE_URL);
+        StringBuffer errorMsgs;
         if (restEndpoint.endsWith("/")) {
             restEndpoint = restEndpoint.substring(0, restEndpoint.length() - 1);
         }
@@ -90,7 +91,7 @@ public class KafkaRequestSender implements IKafkaRequestSender {
         completedRequest.setErrorMsg(info.getErrorMsg());
         completedRequest.setOcrDate(OffsetDateTime.now(ZoneId.of("UTC")).toString());
         completedRequest.setTextFilename(info.getFilename());
-
+    
         try {
             requestProducer.sendRequest(completedRequest,
                     propertyManager.getProperty(Properties.KAFKA_TOPIC_OCR_COMPLETE));
