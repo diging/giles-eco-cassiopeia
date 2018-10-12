@@ -91,21 +91,7 @@ public class KafkaRequestSender implements IKafkaRequestSender {
         completedRequest.setErrorMsg(info.getErrorMsg());
         completedRequest.setOcrDate(OffsetDateTime.now(ZoneId.of("UTC")).toString());
         completedRequest.setTextFilename(info.getFilename());
-       
-		if ((fileEndpoint == null) || (fileEndpoint.contains("null"))) { // check for null value in url
-			errorMsgs = new StringBuffer(info.getErrorMsg());
-
-			if (errorMsgs.length() != 0) {
-				if (!errorMsgs.toString().endsWith(".")) {
-					errorMsgs.append(".");
-				}
-			   errorMsgs.append("Also,");
-			}
-			errorMsgs.append("File End Point is null or having null component vales in URL");
-
-			completedRequest.setErrorMsg(errorMsgs.toString());
-			completedRequest.setStatus(RequestStatus.FAILED);
-		}
+    
         try {
             requestProducer.sendRequest(completedRequest,
                     propertyManager.getProperty(Properties.KAFKA_TOPIC_OCR_COMPLETE));
