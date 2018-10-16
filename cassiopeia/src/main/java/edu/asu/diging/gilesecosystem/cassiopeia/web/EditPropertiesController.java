@@ -1,5 +1,8 @@
 package edu.asu.diging.gilesecosystem.cassiopeia.web;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,12 +39,49 @@ public class EditPropertiesController {
     private ISystemMessageHandler messageHandler;
 
     Map<String, String> ocrTypeMap = new HashMap<>();
+    Map<String, String> langTypeMap = new HashMap<>();
+
 
     @InitBinder
     protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder, WebDataBinder validateBinder) {
         validateBinder.addValidators(new SystemConfigValidator());
         ocrTypeMap.put(Properties.OCR_PLAINTEXT, propertyManager.getProperty(Properties.OCR_PLAINTEXT));
         ocrTypeMap.put(Properties.OCR_HOCR, propertyManager.getProperty(Properties.OCR_HOCR));
+        
+        String[] langs = getTessLangs();
+        for(int i=0;i<langs.length;i++) {
+        	langTypeMap.put(langs[i],langs[i]);
+        } 
+    }
+    
+    public String[] getTessLangs() {
+        String command = "/usr/local/bin/tesseract --list-langs";
+        Process proc;
+        BufferedReader reader;
+        String output = "";
+        String[] lang_list;
+        String[] languages;
+        try {
+			proc = Runtime.getRuntime().exec(command);
+			reader =  
+		              new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			String line = "";
+	        while((line = reader.readLine()) != null) {
+	        	output = output + line + " ";
+	        }
+	        proc.waitFor();   
+		} catch (IOException e) {
+            messageHandler.handleMessage("Error while getting the Tesserract laguages.", e, MessageType.ERROR);
+		} catch (InterruptedException e) {
+            messageHandler.handleMessage("Error while getting the Tesserract laguages.", e, MessageType.ERROR);
+
+		}
+        
+        lang_list = output.split(":");
+        languages = lang_list[1].split(" ");
+        
+        return languages;
+
     }
 
     @RequestMapping(value = "/admin/system/config", method = RequestMethod.GET)
@@ -55,8 +95,10 @@ public class EditPropertiesController {
             page.setOCRType(Properties.OCR_HOCR);
         } else {
             page.setOCRType(Properties.OCR_PLAINTEXT);
+            page.setLanguageType("Select");
         }
 
+        model.addAttribute("langTypes", langTypeMap);
         model.addAttribute("ocrTypes", ocrTypeMap);
         model.addAttribute("systemConfigPage", page);
         return "admin/system/config";

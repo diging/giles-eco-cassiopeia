@@ -36,6 +36,15 @@
         <label for="name">OCR Type</label>
         <form:select class="form-control" id="${systemConfigPage.getOCRType()}" path="OCRType" items="${ocrTypes}"></form:select>
     </div>
+    
+    <div class="page-header">
+        <h3>Language Settings</h3>
+    </div>
+
+    <div class="form-group">
+        <label for="name">Languages</label>
+        <form:select class="form-control" id="${systemConfigPage.getLanguageType()}" path="LanguageType" items="${langTypes}"></form:select>
+    </div>
 
     <button class="btn btn-primary btn-md pull-right" type="submit">Save
         Changes!</button>
