@@ -63,8 +63,7 @@ public class EditPropertiesController {
         String[] languages;
         try {
 			proc = Runtime.getRuntime().exec(command);
-			reader =  
-		              new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			reader =  new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = "";
 	        while((line = reader.readLine()) != null) {
 	        	output = output + line + " ";
@@ -74,14 +73,11 @@ public class EditPropertiesController {
             messageHandler.handleMessage("Error while getting the Tesserract laguages.", e, MessageType.ERROR);
 		} catch (InterruptedException e) {
             messageHandler.handleMessage("Error while getting the Tesserract laguages.", e, MessageType.ERROR);
-
 		}
-        
         lang_list = output.split(":");
         languages = lang_list[1].split(" ");
         
         return languages;
-
     }
 
     @RequestMapping(value = "/admin/system/config", method = RequestMethod.GET)
@@ -95,7 +91,6 @@ public class EditPropertiesController {
             page.setOCRType(Properties.OCR_HOCR);
         } else {
             page.setOCRType(Properties.OCR_PLAINTEXT);
-            page.setLanguageType("Select");
         }
 
         model.addAttribute("langTypes", langTypeMap);
