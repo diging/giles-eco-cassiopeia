@@ -37,8 +37,6 @@ public class SystemConfigPage {
 
 	public void setLanguageType(String languagetype) {
 		languageType = languagetype;
-	}
-    
-    
+	}   
 
 }
