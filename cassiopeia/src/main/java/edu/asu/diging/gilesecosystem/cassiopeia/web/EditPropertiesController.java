@@ -40,6 +40,7 @@ public class EditPropertiesController {
 
     Map<String, String> ocrTypeMap = new HashMap<>();
     Map<String, String> langTypeMap = new HashMap<>();
+    String defaultLang = new String();
 
 
     @InitBinder
@@ -49,9 +50,12 @@ public class EditPropertiesController {
         ocrTypeMap.put(Properties.OCR_HOCR, propertyManager.getProperty(Properties.OCR_HOCR));
         
         String[] langs = getTessLangs();
-        for(int i=0;i<langs.length;i++) {
+        for(int i=1;i<langs.length;i++) {
         	langTypeMap.put(langs[i],langs[i]);
         } 
+        if(langTypeMap.containsKey(Properties.ENGLISH)) {
+        	defaultLang = langTypeMap.get(Properties.ENGLISH);
+        }
     }
     
     public String[] getTessLangs() {
@@ -91,6 +95,7 @@ public class EditPropertiesController {
             page.setOCRType(Properties.OCR_HOCR);
         } else {
             page.setOCRType(Properties.OCR_PLAINTEXT);
+            page.setLanguageType(defaultLang);
         }
 
         model.addAttribute("langTypes", langTypeMap);

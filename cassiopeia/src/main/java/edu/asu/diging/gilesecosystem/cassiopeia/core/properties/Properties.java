@@ -18,5 +18,6 @@ public interface Properties {
     public final static String OCR_HOCR = "ocr_hocr";
 
     public final static String APPLICATION_ID = "application_id";
+    public final static String ENGLISH = "eng";
 
 }
