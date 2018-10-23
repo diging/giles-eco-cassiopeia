@@ -10,6 +10,7 @@ public class SystemConfigPage {
     public String getBaseUrl() {
         return baseUrl;
     }
+    
     public void setBaseUrl(String nepomukUrl) {
         this.baseUrl = nepomukUrl;
     }
