@@ -90,7 +90,7 @@ public class KafkaRequestSender implements IKafkaRequestSender {
         completedRequest.setErrorMsg(info.getErrorMsg());
         completedRequest.setOcrDate(OffsetDateTime.now(ZoneId.of("UTC")).toString());
         completedRequest.setTextFilename(info.getFilename());
-    
+        
         try {
             requestProducer.sendRequest(completedRequest,
                     propertyManager.getProperty(Properties.KAFKA_TOPIC_OCR_COMPLETE));
