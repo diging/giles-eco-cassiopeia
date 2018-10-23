@@ -20,6 +20,7 @@ import javax.imageio.ImageIO;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -62,8 +63,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
+import edu.asu.diging.gilesecosystem.cassiopeia.core.properties.Properties;
 import edu.asu.diging.gilesecosystem.septemberutil.properties.MessageType;
 import edu.asu.diging.gilesecosystem.septemberutil.service.ISystemMessageHandler;
+import edu.asu.diging.gilesecosystem.util.properties.IPropertiesManager;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -85,7 +88,7 @@ public class TesseractOCRParser extends AbstractParser {
 
     @Autowired
     private ISystemMessageHandler messageHandler;
-
+  
     private static final long serialVersionUID = -8167538283213097265L;
     private static final TesseractOCRConfig DEFAULT_CONFIG = new TesseractOCRConfig();
     private static final Set<MediaType> SUPPORTED_TYPES = Collections.unmodifiableSet(
@@ -348,6 +351,32 @@ public class TesseractOCRParser extends AbstractParser {
 
     static String getTesseractProg() {
         return System.getProperty("os.name").startsWith("Windows") ? "tesseract.exe" : "tesseract";
+    }
+    
+    public String[] getTessLangs(IPropertiesManager propertyManager) {
+    	String tesseractBin = propertyManager.getProperty(Properties.TESSERACT_BIN_FOLDER);
+    	String command = tesseractBin + "/tesseract --list-langs";
+        Process proc;
+        BufferedReader reader;
+        String output = "";
+        String[] lang_list;
+        String[] languages;
+        try {
+			proc = Runtime.getRuntime().exec(command);
+			reader =  new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			String line = "";
+	        while((line = reader.readLine()) != null) {
+	        	output = output + line + " ";
+	        }
+	        proc.waitFor();   
+		} catch (IOException e) {
+            messageHandler.handleMessage("Error while getting Tesserract languages.", e, MessageType.ERROR);
+		} catch (InterruptedException e) {
+            messageHandler.handleMessage("Error while getting Tesserract languages.", e, MessageType.ERROR);
+		}
+        lang_list = output.split(":");
+        languages = lang_list[1].split(" ");
+        return languages;
     }
 
 }

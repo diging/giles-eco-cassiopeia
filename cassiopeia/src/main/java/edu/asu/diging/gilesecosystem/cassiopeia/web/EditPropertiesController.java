@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.tika.parser.ocr.TesseractOCRParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -40,7 +41,7 @@ public class EditPropertiesController {
 
     private Map<String, String> ocrTypeMap = new HashMap<>();
     private Map<String, String> langTypeMap = new HashMap<>();
-    String defaultLang = new String();
+    String defaultLang = new String("");
 
 
     @InitBinder
@@ -49,40 +50,17 @@ public class EditPropertiesController {
         ocrTypeMap.put(Properties.OCR_PLAINTEXT, propertyManager.getProperty(Properties.OCR_PLAINTEXT));
         ocrTypeMap.put(Properties.OCR_HOCR, propertyManager.getProperty(Properties.OCR_HOCR));
         
-        String[] langs = getTessLangs();
+        TesseractOCRParser tessPars = new TesseractOCRParser(true);
+        String[] langs = tessPars.getTessLangs(propertyManager);
         for(int i=1;i<langs.length;i++) {
         	langTypeMap.put(langs[i],langs[i]);
         } 
         if(langTypeMap.containsKey(Properties.ENGLISH)) {
         	defaultLang = langTypeMap.get(Properties.ENGLISH);
         }
+        tessPars=null;
     }
     
-    public String[] getTessLangs() {
-        String command = "/usr/local/bin/tesseract --list-langs";
-        Process proc;
-        BufferedReader reader;
-        String output = "";
-        String[] lang_list;
-        String[] languages;
-        try {
-			proc = Runtime.getRuntime().exec(command);
-			reader =  new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			String line = "";
-	        while((line = reader.readLine()) != null) {
-	        	output = output + line + " ";
-	        }
-	        proc.waitFor();   
-		} catch (IOException e) {
-            messageHandler.handleMessage("Error while getting the Tesserract laguages.", e, MessageType.ERROR);
-		} catch (InterruptedException e) {
-            messageHandler.handleMessage("Error while getting the Tesserract laguages.", e, MessageType.ERROR);
-		}
-        lang_list = output.split(":");
-        languages = lang_list[1].split(" ");
-        
-        return languages;
-    }
 
     @RequestMapping(value = "/admin/system/config", method = RequestMethod.GET)
     public String getConfigPage(Model model) {
