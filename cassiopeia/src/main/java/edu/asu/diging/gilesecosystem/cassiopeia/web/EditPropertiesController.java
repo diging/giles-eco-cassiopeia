@@ -38,8 +38,8 @@ public class EditPropertiesController {
     @Autowired
     private ISystemMessageHandler messageHandler;
 
-    Map<String, String> ocrTypeMap = new HashMap<>();
-    Map<String, String> langTypeMap = new HashMap<>();
+    private Map<String, String> ocrTypeMap = new HashMap<>();
+    private Map<String, String> langTypeMap = new HashMap<>();
     String defaultLang = new String();
 
 
