@@ -66,17 +66,14 @@ public class KafkaRequestSender implements IKafkaRequestSender {
             fileEndpoint = restEndpoint + DownloadFileController.GET_FILE_URL
                     .replace(DownloadFileController.REQUEST_ID_PLACEHOLDER, requestId)
                     .replace(DownloadFileController.DOCUMENT_ID_PLACEHOLDER, documentId)
-                    .replace(DownloadFileController.FILENAME_PLACEHOLDER,
-                            info.getFilename());
+                    .replace(DownloadFileController.FILENAME_PLACEHOLDER, info.getFilename());
         }
 
         ICompletedOCRRequest completedRequest = null;
         try {
-            completedRequest = requestFactory.createRequest(requestId,
-                    info.getUploadId());
+            completedRequest = requestFactory.createRequest(requestId, info.getUploadId());
         } catch (InstantiationException | IllegalAccessException e) {
-            messageHandler.handleMessage("Could not create request.", e,
-                    MessageType.ERROR);
+            messageHandler.handleMessage("Could not create request.", e, MessageType.ERROR);
             // this should never happen if used correctly
         }
 
@@ -90,7 +87,7 @@ public class KafkaRequestSender implements IKafkaRequestSender {
         completedRequest.setErrorMsg(info.getErrorMsg());
         completedRequest.setOcrDate(OffsetDateTime.now(ZoneId.of("UTC")).toString());
         completedRequest.setTextFilename(info.getFilename());
-        
+
         try {
             requestProducer.sendRequest(completedRequest,
                     propertyManager.getProperty(Properties.KAFKA_TOPIC_OCR_COMPLETE));
