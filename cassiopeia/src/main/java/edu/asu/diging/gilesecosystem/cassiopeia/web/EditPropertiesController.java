@@ -47,15 +47,6 @@ public class EditPropertiesController {
         ocrTypeMap.put(Properties.OCR_PLAINTEXT, propertyManager.getProperty(Properties.OCR_PLAINTEXT));
         ocrTypeMap.put(Properties.OCR_HOCR, propertyManager.getProperty(Properties.OCR_HOCR));
 
-        TesseractOCRParser tessPars = new TesseractOCRParser(true);
-        String[] langs = tessPars.getTessLangs(propertyManager);
-        for (int i = 1; i < langs.length; i++) {
-            langTypeMap.put(langs[i], langs[i]);
-        }
-        if (langTypeMap.containsKey(Properties.ENGLISH)) {
-            defaultLang = langTypeMap.get(Properties.ENGLISH);
-        }
-        tessPars = null;
     }
 
     @RequestMapping(value = "/admin/system/config", method = RequestMethod.GET)
@@ -65,6 +56,15 @@ public class EditPropertiesController {
         page.setGilesAccessToken(propertyManager.getProperty(Properties.GILES_ACCESS_TOKEN));
         page.setBaseUrl(propertyManager.getProperty(Properties.BASE_URL));
 
+        TesseractOCRParser tessPars = new TesseractOCRParser(true);
+        String[] langs = tessPars.getTessLangs(propertyManager);
+        for (int i = 1; i < langs.length; i++) {
+            langTypeMap.put(langs[i], langs[i]);
+        }
+        tessPars = null;
+        if (langTypeMap.containsKey(Properties.ENGLISH)) {
+            defaultLang = langTypeMap.get(Properties.ENGLISH);
+        }
         if (propertyManager.getProperty(Properties.TESSERACT_CREATE_HOCR).equalsIgnoreCase("true")) {
             page.setOCRType(Properties.OCR_HOCR);
         } else {

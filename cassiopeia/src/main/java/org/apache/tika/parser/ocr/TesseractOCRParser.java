@@ -346,15 +346,19 @@ public class TesseractOCRParser extends AbstractParser {
         return System.getProperty("os.name").startsWith("Windows") ? "tesseract.exe" : "tesseract";
     }
 
+    /**
+     * This function gets the list of available languages of Tesseract.
+     * 
+     * @param propertyManager
+     * @return String[] - the list of available languages
+     */
     public String[] getTessLangs(IPropertiesManager propertyManager) {
         String tesseractBin = propertyManager.getProperty(Properties.TESSERACT_BIN_FOLDER);
         String command = tesseractBin + "/tesseract --list-langs";
-        Process proc;
-        BufferedReader reader;
         String output = "";
-        String[] lang_list;
-        String[] languages;
         try {
+            Process proc;
+            BufferedReader reader;
             proc = Runtime.getRuntime().exec(command);
             reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
             String line = "";
@@ -362,13 +366,21 @@ public class TesseractOCRParser extends AbstractParser {
                 output = output + line + " ";
             }
             proc.waitFor();
+            reader.close();
         } catch (IOException e) {
             messageHandler.handleMessage("Error while getting Tesserract languages.", e, MessageType.ERROR);
         } catch (InterruptedException e) {
             messageHandler.handleMessage("Error while getting Tesserract languages.", e, MessageType.ERROR);
         }
+        String[] lang_list;
+        // output will contain string such as "List of available languages : ara eng
+        // oso".
+        // Split is used to collect just the language names from output.
         lang_list = output.split(":");
+
+        String[] languages;
         languages = lang_list[1].split(" ");
+
         return languages;
     }
 
