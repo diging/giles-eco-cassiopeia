@@ -59,13 +59,14 @@ import org.apache.tika.parser.image.ImageParser;
 import org.apache.tika.parser.image.TiffParser;
 import org.apache.tika.parser.jpeg.JpegParser;
 import org.apache.tika.sax.XHTMLContentHandler;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Service;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
 import edu.asu.diging.gilesecosystem.cassiopeia.core.properties.Properties;
 import edu.asu.diging.gilesecosystem.septemberutil.properties.MessageType;
-import edu.asu.diging.gilesecosystem.septemberutil.service.ISystemMessageHandler;
+import edu.asu.diging.gilesecosystem.septemberutil.service.impl.SystemMessageHandler;
 import edu.asu.diging.gilesecosystem.util.properties.IPropertiesManager;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -86,8 +87,13 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public class TesseractOCRParser extends AbstractParser {
 
-    @Autowired
-    private ISystemMessageHandler messageHandler;
+    // @Autowired
+    // private ISystemMessageHandler messageHandler;
+
+    ApplicationContext context = SpringContext.getAppContext();
+
+    Map<String, Object> beans = context.getBeansWithAnnotation(Service.class);
+    SystemMessageHandler sysMsgHandler = (SystemMessageHandler) beans.get("SystemMessageHandler");
 
     private static final long serialVersionUID = -8167538283213097265L;
     private static final TesseractOCRConfig DEFAULT_CONFIG = new TesseractOCRConfig();
@@ -282,7 +288,7 @@ public class TesseractOCRParser extends AbstractParser {
 
         } catch (ExecutionException e) {
             // should not be thrown
-            messageHandler.handleMessage("TesseractOCRParser attempting to retrive result of aborted task.", e,
+            sysMsgHandler.handleMessage("TesseractOCRParser attempting to retrive result of aborted task.", e,
                     MessageType.ERROR);
         } catch (TimeoutException e) {
             waitThread.interrupt();
@@ -331,7 +337,7 @@ public class TesseractOCRParser extends AbstractParser {
                     for (int n = reader.read(buffer); n != -1; n = reader.read(buffer))
                         out.append(buffer, 0, n);
                 } catch (IOException e) {
-                    messageHandler.handleMessage("Could not read input stream.", e, MessageType.ERROR);
+                    sysMsgHandler.handleMessage("Could not read input stream.", e, MessageType.ERROR);
                 } finally {
                     IOUtils.closeQuietly(stream);
                 }
@@ -368,13 +374,13 @@ public class TesseractOCRParser extends AbstractParser {
             proc.waitFor();
             reader.close();
         } catch (IOException e) {
-            messageHandler.handleMessage("Error while getting Tesserract languages.", e, MessageType.ERROR);
+            sysMsgHandler.handleMessage("Error while getting Tesserract languages.", e, MessageType.ERROR);
         } catch (InterruptedException e) {
-            messageHandler.handleMessage("Error while getting Tesserract languages.", e, MessageType.ERROR);
+            sysMsgHandler.handleMessage("Error while getting Tesserract languages.", e, MessageType.ERROR);
         }
         String[] lang_list;
         // output will contain string such as "List of available languages : ara eng
-        // oso".
+        // osd".
         // Split is used to collect just the language names from output.
         lang_list = output.split(":");
 
