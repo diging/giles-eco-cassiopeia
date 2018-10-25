@@ -1,8 +1,5 @@
 package edu.asu.diging.gilesecosystem.cassiopeia.web;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +38,7 @@ public class EditPropertiesController {
 
     private Map<String, String> ocrTypeMap = new HashMap<>();
     private Map<String, String> langTypeMap = new HashMap<>();
-    String defaultLang = new String("");
+    private String defaultLang = new String("");
 
     @InitBinder
     protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder,
