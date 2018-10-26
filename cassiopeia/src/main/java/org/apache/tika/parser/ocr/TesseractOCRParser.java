@@ -16,7 +16,7 @@
  */
 package org.apache.tika.parser.ocr;
 
-import javax.imageio.ImageIO;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -42,6 +42,8 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.imageio.ImageIO;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.LogFactory;
 import org.apache.tika.exception.TikaException;
@@ -59,17 +61,14 @@ import org.apache.tika.parser.image.ImageParser;
 import org.apache.tika.parser.image.TiffParser;
 import org.apache.tika.parser.jpeg.JpegParser;
 import org.apache.tika.sax.XHTMLContentHandler;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Service;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
 import edu.asu.diging.gilesecosystem.cassiopeia.core.properties.Properties;
+import edu.asu.diging.gilesecosystem.cassiopeia.util.BeanUtil;
 import edu.asu.diging.gilesecosystem.septemberutil.properties.MessageType;
 import edu.asu.diging.gilesecosystem.septemberutil.service.impl.SystemMessageHandler;
 import edu.asu.diging.gilesecosystem.util.properties.IPropertiesManager;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * TesseractOCRParser powered by tesseract-ocr engine. To enable this parser,
@@ -87,13 +86,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public class TesseractOCRParser extends AbstractParser {
 
-    // @Autowired
-    // private ISystemMessageHandler messageHandler;
-
-    ApplicationContext context = SpringContext.getAppContext();
-
-    Map<String, Object> beans = context.getBeansWithAnnotation(Service.class);
-    SystemMessageHandler sysMsgHandler = (SystemMessageHandler) beans.get("SystemMessageHandler");
+    private SystemMessageHandler sysMsgHandler = BeanUtil.getBean(SystemMessageHandler.class);
 
     private static final long serialVersionUID = -8167538283213097265L;
     private static final TesseractOCRConfig DEFAULT_CONFIG = new TesseractOCRConfig();
