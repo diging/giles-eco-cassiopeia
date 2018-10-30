@@ -4,6 +4,7 @@ public interface Properties {
 
     public final static String BASE_URL = "cassiopeia_url";
     public final static String KAFKA_HOSTS = "kafka_hosts";
+    public final static String LANGUAGE = "language";
 
     public final static String TESSERACT_BIN_FOLDER = "tesseract_bin_folder";
     public final static String TESSERACT_DATA_FOLDER = "tesseract_data_folder";

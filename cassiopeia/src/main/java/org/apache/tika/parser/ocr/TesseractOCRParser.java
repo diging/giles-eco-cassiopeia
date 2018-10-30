@@ -65,7 +65,6 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
 import edu.asu.diging.gilesecosystem.cassiopeia.core.properties.Properties;
-import edu.asu.diging.gilesecosystem.cassiopeia.util.BeanUtil;
 import edu.asu.diging.gilesecosystem.septemberutil.properties.MessageType;
 import edu.asu.diging.gilesecosystem.septemberutil.service.impl.SystemMessageHandler;
 import edu.asu.diging.gilesecosystem.util.properties.IPropertiesManager;
@@ -86,7 +85,7 @@ import edu.asu.diging.gilesecosystem.util.properties.IPropertiesManager;
  */
 public class TesseractOCRParser extends AbstractParser {
 
-    private SystemMessageHandler sysMsgHandler = BeanUtil.getBean(SystemMessageHandler.class);
+    private SystemMessageHandler sysMsgHandler;
 
     private static final long serialVersionUID = -8167538283213097265L;
     private static final TesseractOCRConfig DEFAULT_CONFIG = new TesseractOCRConfig();
@@ -97,8 +96,9 @@ public class TesseractOCRParser extends AbstractParser {
 
     private boolean createHOCR = false;
 
-    public TesseractOCRParser(boolean createHOCR) {
+    public TesseractOCRParser(boolean createHOCR, SystemMessageHandler sysMsgHandler) {
         this.createHOCR = createHOCR;
+        this.sysMsgHandler = sysMsgHandler;
     }
 
     @Override

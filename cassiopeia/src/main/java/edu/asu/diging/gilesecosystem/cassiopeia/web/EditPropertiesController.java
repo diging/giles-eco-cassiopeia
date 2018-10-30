@@ -24,6 +24,7 @@ import edu.asu.diging.gilesecosystem.cassiopeia.web.pages.SystemConfigPage;
 import edu.asu.diging.gilesecosystem.cassiopeia.web.validators.SystemConfigValidator;
 import edu.asu.diging.gilesecosystem.septemberutil.properties.MessageType;
 import edu.asu.diging.gilesecosystem.septemberutil.service.ISystemMessageHandler;
+import edu.asu.diging.gilesecosystem.septemberutil.service.impl.SystemMessageHandler;
 import edu.asu.diging.gilesecosystem.util.exceptions.PropertiesStorageException;
 import edu.asu.diging.gilesecosystem.util.properties.IPropertiesManager;
 
@@ -35,6 +36,9 @@ public class EditPropertiesController {
 
     @Autowired
     private ISystemMessageHandler messageHandler;
+    
+    @Autowired
+    private SystemMessageHandler msgHandler;
 
     private Map<String, String> ocrTypeMap = new HashMap<>();
     private Map<String, String> langTypeMap = new HashMap<>();
@@ -56,7 +60,7 @@ public class EditPropertiesController {
         page.setGilesAccessToken(propertyManager.getProperty(Properties.GILES_ACCESS_TOKEN));
         page.setBaseUrl(propertyManager.getProperty(Properties.BASE_URL));
 
-        TesseractOCRParser tessPars = new TesseractOCRParser(true);
+        TesseractOCRParser tessPars = new TesseractOCRParser(true,msgHandler);
         String[] langs = tessPars.getTessLangs(propertyManager);
         for (int i = 1; i < langs.length; i++) {
             langTypeMap.put(langs[i], langs[i]);
@@ -94,6 +98,8 @@ public class EditPropertiesController {
         Map<String, String> propertiesMap = new HashMap<String, String>();
         propertiesMap.put(Properties.GILES_ACCESS_TOKEN, systemConfigPage.getGilesAccessToken());
         propertiesMap.put(Properties.BASE_URL, systemConfigPage.getBaseUrl());
+        propertiesMap.put(Properties.LANGUAGE, systemConfigPage.getLanguageType());
+        
         if (systemConfigPage.getOCRType().equals(Properties.OCR_HOCR)) {
             propertiesMap.put(Properties.TESSERACT_CREATE_HOCR, "true");
         } else {
