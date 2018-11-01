@@ -85,7 +85,7 @@ import edu.asu.diging.gilesecosystem.util.properties.IPropertiesManager;
  */
 public class TesseractOCRParser extends AbstractParser {
 
-    private SystemMessageHandler sysMsgHandler;
+    private SystemMessageHandler sysMsgHandler ;
 
     private static final long serialVersionUID = -8167538283213097265L;
     private static final TesseractOCRConfig DEFAULT_CONFIG = new TesseractOCRConfig();
@@ -96,7 +96,7 @@ public class TesseractOCRParser extends AbstractParser {
 
     private boolean createHOCR = false;
 
-    public TesseractOCRParser(boolean createHOCR, SystemMessageHandler sysMsgHandler) {
+    public TesseractOCRParser(boolean createHOCR,SystemMessageHandler sysMsgHandler) {
         this.createHOCR = createHOCR;
         this.sysMsgHandler = sysMsgHandler;
     }
@@ -351,18 +351,18 @@ public class TesseractOCRParser extends AbstractParser {
      * @param propertyManager
      * @return String[] - the list of available languages
      */
-    public String[] getTessLangs(IPropertiesManager propertyManager) {
+    public List<String> getTessLangs(IPropertiesManager propertyManager) {
         String tesseractBin = propertyManager.getProperty(Properties.TESSERACT_BIN_FOLDER);
         String command = tesseractBin + "/tesseract --list-langs";
-        String output = "";
+        List<String> output = new ArrayList<String>();
+        BufferedReader reader = null;
         try {
             Process proc;
-            BufferedReader reader;
             proc = Runtime.getRuntime().exec(command);
             reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
             String line = "";
             while ((line = reader.readLine()) != null) {
-                output = output + line + " ";
+                output.add(line);
             }
             proc.waitFor();
             reader.close();
@@ -370,17 +370,8 @@ public class TesseractOCRParser extends AbstractParser {
             sysMsgHandler.handleMessage("Error while getting Tesserract languages.", e, MessageType.ERROR);
         } catch (InterruptedException e) {
             sysMsgHandler.handleMessage("Error while getting Tesserract languages.", e, MessageType.ERROR);
-        }
-        String[] lang_list;
-        // output will contain string such as "List of available languages : ara eng
-        // osd".
-        // Split is used to collect just the language names from output.
-        lang_list = output.split(":");
-
-        String[] languages;
-        languages = lang_list[1].split(" ");
-
-        return languages;
+        } 
+        return output;
     }
 
 }

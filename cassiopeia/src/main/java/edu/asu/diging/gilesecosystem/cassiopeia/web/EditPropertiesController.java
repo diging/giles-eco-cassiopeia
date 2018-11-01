@@ -1,5 +1,7 @@
 package edu.asu.diging.gilesecosystem.cassiopeia.web;
 
+import java.util.List;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,9 +63,11 @@ public class EditPropertiesController {
         page.setBaseUrl(propertyManager.getProperty(Properties.BASE_URL));
 
         TesseractOCRParser tessPars = new TesseractOCRParser(true,msgHandler);
-        String[] langs = tessPars.getTessLangs(propertyManager);
-        for (int i = 1; i < langs.length; i++) {
-            langTypeMap.put(langs[i], langs[i]);
+        List<String> langs = new ArrayList<String>();
+        langs.addAll(tessPars.getTessLangs(propertyManager)); 
+        
+        for (int i = 1; i < langs.size(); i++) {
+            langTypeMap.put(langs.get(i), langs.get(i));
         }
         tessPars = null;
         if (langTypeMap.containsKey(Properties.ENGLISH)) {
@@ -73,8 +77,8 @@ public class EditPropertiesController {
             page.setOCRType(Properties.OCR_HOCR);
         } else {
             page.setOCRType(Properties.OCR_PLAINTEXT);
-            page.setLanguageType(defaultLang);
         }
+        page.setLanguageType(defaultLang);
 
         model.addAttribute("langTypes", langTypeMap);
         model.addAttribute("ocrTypes", ocrTypeMap);
