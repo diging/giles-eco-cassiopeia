@@ -35,7 +35,6 @@ import edu.asu.diging.gilesecosystem.requests.IOCRRequest;
 import edu.asu.diging.gilesecosystem.requests.RequestStatus;
 import edu.asu.diging.gilesecosystem.septemberutil.properties.MessageType;
 import edu.asu.diging.gilesecosystem.septemberutil.service.ISystemMessageHandler;
-import edu.asu.diging.gilesecosystem.septemberutil.service.impl.SystemMessageHandler;
 import edu.asu.diging.gilesecosystem.util.files.IFileStorageManager;
 import edu.asu.diging.gilesecosystem.util.properties.IPropertiesManager;
 
@@ -54,9 +53,6 @@ public class OCRManager implements IOCRManager {
 
     @Autowired
     private ISystemMessageHandler messageHandler;
-    
-    @Autowired
-    private SystemMessageHandler msgHandler;
 
     /*
      * (non-Javadoc)
@@ -81,7 +77,7 @@ public class OCRManager implements IOCRManager {
 
         ParseContext parseContext = new ParseContext();
         parseContext.set(TesseractOCRConfig.class, config);
-        TesseractOCRParser ocrParser = new TesseractOCRParser(createHocr,msgHandler);
+        TesseractOCRParser ocrParser = new TesseractOCRParser(createHocr,messageHandler);
 
         Metadata metadata = new Metadata();
         BodyContentHandler handler = new BodyContentHandler();
