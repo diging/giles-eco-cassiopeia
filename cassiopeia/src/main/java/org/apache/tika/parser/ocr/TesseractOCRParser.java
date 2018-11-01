@@ -66,7 +66,7 @@ import org.xml.sax.SAXException;
 
 import edu.asu.diging.gilesecosystem.cassiopeia.core.properties.Properties;
 import edu.asu.diging.gilesecosystem.septemberutil.properties.MessageType;
-import edu.asu.diging.gilesecosystem.septemberutil.service.impl.SystemMessageHandler;
+import edu.asu.diging.gilesecosystem.septemberutil.service.ISystemMessageHandler;
 import edu.asu.diging.gilesecosystem.util.properties.IPropertiesManager;
 
 /**
@@ -85,7 +85,7 @@ import edu.asu.diging.gilesecosystem.util.properties.IPropertiesManager;
  */
 public class TesseractOCRParser extends AbstractParser {
 
-    private SystemMessageHandler sysMsgHandler ;
+    private ISystemMessageHandler sysMsgHandler ;
 
     private static final long serialVersionUID = -8167538283213097265L;
     private static final TesseractOCRConfig DEFAULT_CONFIG = new TesseractOCRConfig();
@@ -96,7 +96,7 @@ public class TesseractOCRParser extends AbstractParser {
 
     private boolean createHOCR = false;
 
-    public TesseractOCRParser(boolean createHOCR,SystemMessageHandler sysMsgHandler) {
+    public TesseractOCRParser(boolean createHOCR,ISystemMessageHandler sysMsgHandler) {
         this.createHOCR = createHOCR;
         this.sysMsgHandler = sysMsgHandler;
     }
@@ -357,20 +357,25 @@ public class TesseractOCRParser extends AbstractParser {
         List<String> output = new ArrayList<String>();
         BufferedReader reader = null;
         try {
-            Process proc;
-            proc = Runtime.getRuntime().exec(command);
+            Process proc = Runtime.getRuntime().exec(command);
             reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
             String line = "";
             while ((line = reader.readLine()) != null) {
                 output.add(line);
             }
             proc.waitFor();
-            reader.close();
         } catch (IOException e) {
             sysMsgHandler.handleMessage("Error while getting Tesserract languages.", e, MessageType.ERROR);
         } catch (InterruptedException e) {
             sysMsgHandler.handleMessage("Error while getting Tesserract languages.", e, MessageType.ERROR);
-        } 
+        }
+        if(reader != null) {
+            try {
+                reader.close();
+            } catch (IOException e) {
+                sysMsgHandler.handleMessage("Error while closing the reader.", e, MessageType.ERROR);
+            }
+        }
         return output;
     }
 
