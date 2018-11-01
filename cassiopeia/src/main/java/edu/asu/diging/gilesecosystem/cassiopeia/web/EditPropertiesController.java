@@ -79,7 +79,6 @@ public class EditPropertiesController {
             page.setOCRType(Properties.OCR_PLAINTEXT);
         }
         page.setLanguageType(defaultLang);
-
         model.addAttribute("langTypes", langTypeMap);
         model.addAttribute("ocrTypes", ocrTypeMap);
         model.addAttribute("systemConfigPage", page);
