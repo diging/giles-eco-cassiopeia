@@ -369,7 +369,7 @@ public class TesseractOCRParser extends AbstractParser {
         } catch (InterruptedException e) {
             sysMsgHandler.handleMessage("Error while getting Tesserract languages.", e, MessageType.ERROR);
         }
-        if(reader != null) {
+        finally {
             try {
                 reader.close();
             } catch (IOException e) {
