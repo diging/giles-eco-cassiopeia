@@ -360,8 +360,13 @@ public class TesseractOCRParser extends AbstractParser {
             Process proc = Runtime.getRuntime().exec(command);
             reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
             String line = "";
+             /* proc.getInputStream() will contain string such as 
+             "List of available languages (3):
+              ara 
+              eng
+              osd"*/
             while ((line = reader.readLine()) != null) {
-                output.add(line);
+                output.add(line); //Taking the line inputs in the list 'output' 
             }
             proc.waitFor();
         } catch (IOException e) {
