@@ -47,26 +47,26 @@
 
         <!-- Giles Ecosystem -->
         <dependency>
-    		<groupId>edu.asu.diging</groupId>
-    		<artifactId>giles-eco-util</artifactId>
-    		<version>0.5</version>
+        	<groupId>edu.asu.diging</groupId>
+			<artifactId>giles-eco-util</artifactId>
+			<version>0.5</version>
 		</dependency>
 
-   		<dependency>
-    		<groupId>edu.asu.diging</groupId>
-    		<artifactId>giles-eco-requests</artifactId>
-    		<version>0.8</version>
-		</dependency>
-        <dependency>
-            <groupId>edu.asu.diging.giles-eco</groupId>
-            <artifactId>september-util</artifactId>
-            <version>${geco.september.util.version}</version>
-        </dependency>
-        <dependency>
-    		<groupId>edu.asu.diging</groupId>
-    		<artifactId>giles-eco-kafka-util</artifactId>
-    		<version>0.2</version>
-		</dependency>
+		<dependency>
+			<groupId>edu.asu.diging</groupId>
+			<artifactId>giles-eco-requests</artifactId>
+			<version>0.8</version>
+	   </dependency>
+		<dependency>
+			<groupId>edu.asu.diging.giles-eco</groupId>
+		    <artifactId>september-util</artifactId>
+		    <version>${geco.september.util.version}</version>
+	   </dependency>
+	   <dependency>
+	        <groupId>edu.asu.diging</groupId>
+		    <artifactId>giles-eco-kafka-util</artifactId>
+		    <version>0.2</version>
+	   </dependency>
 
 
         <!-- Spring -->
