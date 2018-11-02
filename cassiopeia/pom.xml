@@ -30,8 +30,12 @@
         <cassiopeia.tmp.folder></cassiopeia.tmp.folder>
         <cassiopeia.giles.accessToken></cassiopeia.giles.accessToken>
 
-        <cassiopeia.base.url>http://localhost:8083/cassiopeia</cassiopeia.base.url>
+        <cassiopeia.base.url>http://localhost:8082/cassiopeia</cassiopeia.base.url>
         <kafka.hosts>localhost:9092</kafka.hosts>
+        
+         <!-- Zookeeper -->
+        <zookeeper.host>localhost</zookeeper.host>
+        <zookeeper.port>2181</zookeeper.port>
 
         <tesseract.bin></tesseract.bin>
         <tesseract.data></tesseract.data>
@@ -43,25 +47,26 @@
 
         <!-- Giles Ecosystem -->
         <dependency>
-            <groupId>edu.asu.diging.giles-eco</groupId>
-            <artifactId>requests</artifactId>
-            <version>${geco.requests.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>edu.asu.diging.giles-eco</groupId>
-            <artifactId>util</artifactId>
-            <version>${geco.util.version}</version>
-        </dependency>
+    		<groupId>edu.asu.diging</groupId>
+    		<artifactId>giles-eco-util</artifactId>
+    		<version>0.5</version>
+		</dependency>
+
+   		<dependency>
+    		<groupId>edu.asu.diging</groupId>
+    		<artifactId>giles-eco-requests</artifactId>
+    		<version>0.8</version>
+		</dependency>
         <dependency>
             <groupId>edu.asu.diging.giles-eco</groupId>
             <artifactId>september-util</artifactId>
             <version>${geco.september.util.version}</version>
         </dependency>
         <dependency>
-        	<groupId>edu.asu.diging.giles-eco</groupId>
-        	<artifactId>kafka-util</artifactId>
-        	<version>${geco.kafka-util.version}</version>
-        </dependency>
+    		<groupId>edu.asu.diging</groupId>
+    		<artifactId>giles-eco-kafka-util</artifactId>
+    		<version>0.2</version>
+		</dependency>
 
 
         <!-- Spring -->
