@@ -30,7 +30,7 @@
         <cassiopeia.tmp.folder></cassiopeia.tmp.folder>
         <cassiopeia.giles.accessToken></cassiopeia.giles.accessToken>
 
-        <cassiopeia.base.url>http://localhost:8083/cassiopeia</cassiopeia.base.url>
+        <cassiopeia.base.url>http://localhost:8082/cassiopeia</cassiopeia.base.url>
         <kafka.hosts>localhost:9092</kafka.hosts>
         
          <!-- Zookeeper -->
