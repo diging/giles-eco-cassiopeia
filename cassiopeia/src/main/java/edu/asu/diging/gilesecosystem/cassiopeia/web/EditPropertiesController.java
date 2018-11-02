@@ -73,12 +73,12 @@ public class EditPropertiesController {
         if (langTypeMap.containsKey(Properties.ENGLISH)) {
             defaultLang = langTypeMap.get(Properties.ENGLISH);
         }
+        page.setLanguageType(defaultLang);
         if (propertyManager.getProperty(Properties.TESSERACT_CREATE_HOCR).equalsIgnoreCase("true")) {
             page.setOCRType(Properties.OCR_HOCR);
         } else {
             page.setOCRType(Properties.OCR_PLAINTEXT);
         }
-        page.setLanguageType(defaultLang);
         model.addAttribute("langTypes", langTypeMap);
         model.addAttribute("ocrTypes", ocrTypeMap);
         model.addAttribute("systemConfigPage", page);
