@@ -14,8 +14,7 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.ocr.TesseractOCRConfig;
 import org.apache.tika.parser.ocr.TesseractOCRParser;
 import org.apache.tika.sax.BodyContentHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
@@ -42,52 +41,53 @@ import edu.asu.diging.gilesecosystem.util.properties.IPropertiesManager;
 @Service
 public class OCRManager implements IOCRManager {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-
     @Autowired
     @Qualifier("fileStorageManager")
     private IFileStorageManager storageManager;
 
     @Autowired
     private IPropertiesManager propertyManager;
-    
+
     @Autowired
     private IKafkaRequestSender kafkaRequestSender;
 
     @Autowired
     private ISystemMessageHandler messageHandler;
 
-    /* (non-Javadoc)
-     * @see edu.asu.diging.gilesecosystem.cassiopeia.core.service.impl.IOCRManager#processOCRRequest(edu.asu.diging.gilesecosystem.requests.IOCRRequest)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see edu.asu.diging.gilesecosystem.cassiopeia.core.service.impl.IOCRManager#
+     * processOCRRequest(edu.asu.diging.gilesecosystem.requests.IOCRRequest)
      */
     @Override
     public void processOCRRequest(IOCRRequest request) {
 
-        storageManager.getAndCreateStoragePath(request.getRequestId(),
-                request.getDocumentId(), null);
+        storageManager.getAndCreateStoragePath(request.getRequestId(), request.getDocumentId(), null);
         byte[] image = downloadFile(request.getDownloadUrl());
-        
+
         String tesseractBin = propertyManager.getProperty(Properties.TESSERACT_BIN_FOLDER);
         String tesseractData = propertyManager.getProperty(Properties.TESSERACT_DATA_FOLDER);
         boolean createHocr = propertyManager.getProperty(Properties.TESSERACT_CREATE_HOCR).equalsIgnoreCase("true");
-        
+
         TesseractOCRConfig config = new TesseractOCRConfig();
         config.setTesseractPath(tesseractBin);
         config.setTessdataPath(tesseractData);
         config.setTimeout(new Integer(propertyManager.getProperty(Properties.TESSERACT_TIMEOUT)));
-        
+
         ParseContext parseContext = new ParseContext();
         parseContext.set(TesseractOCRConfig.class, config);
-        TesseractOCRParser ocrParser = new TesseractOCRParser(createHocr);
-        
+        TesseractOCRParser ocrParser = new TesseractOCRParser(createHocr,messageHandler);
+
         Metadata metadata = new Metadata();
         BodyContentHandler handler = new BodyContentHandler();
-        
+
         RequestInfo info = null;
         try (InputStream stream = new ByteArrayInputStream(image)) {
             ocrParser.parse(stream, handler, metadata, parseContext);
             String ocrResult = handler.toString();
-            info = saveTextToFile(request.getRequestId(), request.getDocumentId(), ocrResult, request.getFilename(), ".txt");
+            info = saveTextToFile(request.getRequestId(), request.getDocumentId(), ocrResult, request.getFilename(),
+                    ".txt");
             info.setUploadId(request.getUploadId());
             info.setFileId(request.getFileId());
             info.setStatus(RequestStatus.COMPLETE);
@@ -101,36 +101,29 @@ public class OCRManager implements IOCRManager {
             info.setErrorMsg(e.getMessage());
             info.setImageFilename(request.getFilename());
         }
-        
-        
+
         kafkaRequestSender.sendRequest(request.getRequestId(), request.getDocumentId(), info);
     }
-    
+
     private byte[] downloadFile(String url) {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM));
-        headers.set(
-                "Authorization",
-                "token "
-                        + propertyManager
-                                .getProperty(Properties.GILES_ACCESS_TOKEN));
+        headers.set("Authorization", "token " + propertyManager.getProperty(Properties.GILES_ACCESS_TOKEN));
         HttpEntity<String> entity = new HttpEntity<String>(headers);
 
-        ResponseEntity<byte[]> response = restTemplate.exchange(url, HttpMethod.GET,
-                entity, byte[].class);
+        ResponseEntity<byte[]> response = restTemplate.exchange(url, HttpMethod.GET, entity, byte[].class);
         if (response.getStatusCode().equals(HttpStatus.OK)) {
             return response.getBody();
         }
         return null;
     }
-    
-    protected RequestInfo saveTextToFile(String requestId,
-            String documentId, String pageText, String filename, String fileExtentions) {
-        String docFolder = storageManager.getAndCreateStoragePath(requestId,
-                documentId, null);
+
+    protected RequestInfo saveTextToFile(String requestId, String documentId, String pageText, String filename,
+            String fileExtentions) {
+        String docFolder = storageManager.getAndCreateStoragePath(requestId, documentId, null);
 
         if (!fileExtentions.startsWith(".")) {
             fileExtentions = "." + fileExtentions;

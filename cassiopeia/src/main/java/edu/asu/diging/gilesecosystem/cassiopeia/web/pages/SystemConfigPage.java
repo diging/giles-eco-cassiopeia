@@ -5,6 +5,7 @@ public class SystemConfigPage {
     private String baseUrl;
     private String gilesAccessToken;
     private String OCRType;
+    private String languageType;
 
     public String getBaseUrl() {
         return baseUrl;
@@ -28,6 +29,14 @@ public class SystemConfigPage {
 
     public void setOCRType(String oCRType) {
         OCRType = oCRType;
+    }
+
+    public String getLanguageType() {
+        return languageType;
+    }
+
+    public void setLanguageType(String languagetype) {
+        languageType = languagetype;
     }
 
 }

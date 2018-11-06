@@ -16,10 +16,11 @@
  */
 package org.apache.tika.parser.ocr;
 
-import javax.imageio.ImageIO;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -41,6 +42,8 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.imageio.ImageIO;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.LogFactory;
 import org.apache.tika.exception.TikaException;
@@ -58,14 +61,11 @@ import org.apache.tika.parser.image.ImageParser;
 import org.apache.tika.parser.image.TiffParser;
 import org.apache.tika.parser.jpeg.JpegParser;
 import org.apache.tika.sax.XHTMLContentHandler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
 import edu.asu.diging.gilesecosystem.septemberutil.properties.MessageType;
 import edu.asu.diging.gilesecosystem.septemberutil.service.ISystemMessageHandler;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * TesseractOCRParser powered by tesseract-ocr engine. To enable this parser,
@@ -83,22 +83,20 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public class TesseractOCRParser extends AbstractParser {
 
-    @Autowired
-    private ISystemMessageHandler messageHandler;
+    private ISystemMessageHandler sysMsgHandler ;
 
     private static final long serialVersionUID = -8167538283213097265L;
     private static final TesseractOCRConfig DEFAULT_CONFIG = new TesseractOCRConfig();
     private static final Set<MediaType> SUPPORTED_TYPES = Collections.unmodifiableSet(
-            new HashSet<MediaType>(Arrays.asList(new MediaType[] {
-                    MediaType.image("png"), MediaType.image("jpeg"), MediaType.image("tiff"),
-                    MediaType.image("x-ms-bmp"), MediaType.image("gif")
-            })));
-    private static Map<String,Boolean> TESSERACT_PRESENT = new HashMap<String, Boolean>();
-    
+            new HashSet<MediaType>(Arrays.asList(new MediaType[] { MediaType.image("png"), MediaType.image("jpeg"),
+                    MediaType.image("tiff"), MediaType.image("x-ms-bmp"), MediaType.image("gif") })));
+    private static Map<String, Boolean> TESSERACT_PRESENT = new HashMap<String, Boolean>();
+
     private boolean createHOCR = false;
-    
-    public TesseractOCRParser(boolean createHOCR) {
+
+    public TesseractOCRParser(boolean createHOCR,ISystemMessageHandler sysMsgHandler) {
         this.createHOCR = createHOCR;
+        this.sysMsgHandler = sysMsgHandler;
     }
 
     @Override
@@ -109,7 +107,7 @@ public class TesseractOCRParser extends AbstractParser {
             return SUPPORTED_TYPES;
 
         // Otherwise don't advertise anything, so the other image parsers
-        //  can be selected instead
+        // can be selected instead
         return Collections.emptySet();
     }
 
@@ -119,8 +117,7 @@ public class TesseractOCRParser extends AbstractParser {
 
         if (!config.getTessdataPath().isEmpty()) {
             env.put(tessdataPrefix, config.getTessdataPath());
-        }
-        else if(!config.getTesseractPath().isEmpty()) {
+        } else if (!config.getTesseractPath().isEmpty()) {
             env.put(tessdataPrefix, config.getTesseractPath());
         }
     }
@@ -139,11 +136,11 @@ public class TesseractOCRParser extends AbstractParser {
         boolean hasTesseract = ExternalParser.check(checkCmd);
         TESSERACT_PRESENT.put(tesseract, hasTesseract);
         return hasTesseract;
-     
+
     }
 
-    public void parse(Image image, ContentHandler handler, Metadata metadata, ParseContext context) throws IOException,
-            SAXException, TikaException {
+    public void parse(Image image, ContentHandler handler, Metadata metadata, ParseContext context)
+            throws IOException, SAXException, TikaException {
 
         TemporaryResources tmp = new TemporaryResources();
         FileOutputStream fos = null;
@@ -173,10 +170,12 @@ public class TesseractOCRParser extends AbstractParser {
             throws IOException, SAXException, TikaException {
         TesseractOCRConfig config = context.get(TesseractOCRConfig.class, DEFAULT_CONFIG);
 
-        // If Tesseract is not on the path with the current config, do not try to run OCR
-        // getSupportedTypes shouldn't have listed us as handling it, so this should only
-        //  occur if someone directly calls this parser, not via DefaultParser or similar
-        if (! hasTesseract(config))
+        // If Tesseract is not on the path with the current config, do not try to run
+        // OCR
+        // getSupportedTypes shouldn't have listed us as handling it, so this should
+        // only
+        // occur if someone directly calls this parser, not via DefaultParser or similar
+        if (!hasTesseract(config))
             return;
 
         XHTMLContentHandler xhtml = new XHTMLContentHandler(handler, metadata);
@@ -206,9 +205,9 @@ public class TesseractOCRParser extends AbstractParser {
             }
 
             // Temporary workaround for TIKA-1445 - until we can specify
-            //  composite parsers with strategies (eg Composite, Try In Turn),
-            //  always send the image onwards to the regular parser to have
-            //  the metadata for them extracted as well
+            // composite parsers with strategies (eg Composite, Try In Turn),
+            // always send the image onwards to the regular parser to have
+            // the metadata for them extracted as well
             _TMP_IMAGE_METADATA_PARSER.parse(tikaStream, handler, metadata, context);
         } finally {
             tmp.dispose();
@@ -217,13 +216,15 @@ public class TesseractOCRParser extends AbstractParser {
             }
         }
     }
+
     // TIKA-1445 workaround parser
     private static Parser _TMP_IMAGE_METADATA_PARSER = new CompositeImageParser();
+
     private static class CompositeImageParser extends CompositeParser {
         private static final long serialVersionUID = -2398203346206381382L;
-        private static List<Parser> imageParsers = Arrays.asList(new Parser[]{
-                new ImageParser(), new JpegParser(), new TiffParser()
-        });
+        private static List<Parser> imageParsers = Arrays
+                .asList(new Parser[] { new ImageParser(), new JpegParser(), new TiffParser() });
+
         CompositeImageParser() {
             super(new MediaTypeRegistry(), imageParsers);
         }
@@ -232,26 +233,21 @@ public class TesseractOCRParser extends AbstractParser {
     /**
      * Run external tesseract-ocr process.
      *
-     * @param input
-     *          File to be ocred
-     * @param output
-     *          File to collect ocr result
-     * @param config
-     *          Configuration of tesseract-ocr engine
-     * @throws TikaException
-     *           if the extraction timed out
-     * @throws IOException
-     *           if an input error occurred
+     * @param input  File to be ocred
+     * @param output File to collect ocr result
+     * @param config Configuration of tesseract-ocr engine
+     * @throws TikaException if the extraction timed out
+     * @throws IOException   if an input error occurred
      */
     private void doOCR(File input, File output, TesseractOCRConfig config) throws IOException, TikaException {
-        
-        List<String> cmd = new ArrayList<>(Arrays.asList(config.getTesseractPath() + getTesseractProg(), input.getPath(), output.getPath(), "-l",
-            config.getLanguage(), "-psm", config.getPageSegMode()));
-        
+
+        List<String> cmd = new ArrayList<>(Arrays.asList(config.getTesseractPath() + getTesseractProg(),
+                input.getPath(), output.getPath(), "-l", config.getLanguage(), "-psm", config.getPageSegMode()));
+
         if (createHOCR) {
             cmd.add("hocr");
         }
-        
+
         ProcessBuilder pb = new ProcessBuilder(cmd.toArray(new String[cmd.size()]));
         setEnv(config, pb);
         final Process process = pb.start();
@@ -283,7 +279,8 @@ public class TesseractOCRParser extends AbstractParser {
 
         } catch (ExecutionException e) {
             // should not be thrown
-            messageHandler.handleMessage("TesseractOCRParser attempting to retrive result of aborted task.", e, MessageType.ERROR);
+            sysMsgHandler.handleMessage("TesseractOCRParser attempting to retrive result of aborted task.", e,
+                    MessageType.ERROR);
         } catch (TimeoutException e) {
             waitThread.interrupt();
             process.destroy();
@@ -296,14 +293,10 @@ public class TesseractOCRParser extends AbstractParser {
      * Reads the contents of the given stream and write it to the given XHTML
      * content handler. The stream is closed once fully processed.
      *
-     * @param stream
-     *          Stream where is the result of ocr
-     * @param xhtml
-     *          XHTML content handler
-     * @throws SAXException
-     *           if the XHTML SAX events could not be handled
-     * @throws IOException
-     *           if an input error occurred
+     * @param stream Stream where is the result of ocr
+     * @param xhtml  XHTML content handler
+     * @throws SAXException if the XHTML SAX events could not be handled
+     * @throws IOException  if an input error occurred
      */
     private void extractOutput(InputStream stream, XHTMLContentHandler xhtml) throws SAXException, IOException {
 
@@ -335,7 +328,7 @@ public class TesseractOCRParser extends AbstractParser {
                     for (int n = reader.read(buffer); n != -1; n = reader.read(buffer))
                         out.append(buffer, 0, n);
                 } catch (IOException e) {
-                    messageHandler.handleMessage("Could not read input stream.", e, MessageType.ERROR);
+                    sysMsgHandler.handleMessage("Could not read input stream.", e, MessageType.ERROR);
                 } finally {
                     IOUtils.closeQuietly(stream);
                 }
@@ -348,6 +341,46 @@ public class TesseractOCRParser extends AbstractParser {
 
     static String getTesseractProg() {
         return System.getProperty("os.name").startsWith("Windows") ? "tesseract.exe" : "tesseract";
+    }
+
+    /**
+     * This function gets the list of available languages of Tesseract.
+     * 
+     * @param propertyManager
+     * @return String[] - the list of available languages
+     */
+    public List<String> getTessLangs(TesseractOCRConfig config) {
+        String command = config.getTesseractPath() + "/tesseract --list-langs";
+        List<String> output = new ArrayList<String>();
+        BufferedReader reader = null;
+        try {
+            // The command to get all the languages Tesseract has ,is run and gets the input in Process class.
+            Process proc = Runtime.getRuntime().exec(command);
+            // The reader gets the language names from the input stream of the process 
+            reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            String line = "";
+             /* proc.getInputStream() will contain string such as 
+             "List of available languages (3):
+              ara 
+              eng
+              osd"*/
+            while ((line = reader.readLine()) != null) {
+                output.add(line); //Taking the line inputs (the language names) in the list 'output' 
+            }
+            proc.waitFor();
+        } catch (IOException e) {
+            sysMsgHandler.handleMessage("Error while getting Tesserract languages.", e, MessageType.ERROR);
+        } catch (InterruptedException e) {
+            sysMsgHandler.handleMessage("Error while getting Tesserract languages.", e, MessageType.ERROR);
+        }
+        finally {
+            try {
+                reader.close();
+            } catch (IOException e) {
+                sysMsgHandler.handleMessage("Error while closing the reader.", e, MessageType.ERROR);
+            }
+        }
+        return output;
     }
 
 }
