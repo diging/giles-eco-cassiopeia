@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.tika.parser.ocr.TesseractOCRConfig;
 import org.apache.tika.parser.ocr.TesseractOCRParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -26,7 +27,6 @@ import edu.asu.diging.gilesecosystem.cassiopeia.web.pages.SystemConfigPage;
 import edu.asu.diging.gilesecosystem.cassiopeia.web.validators.SystemConfigValidator;
 import edu.asu.diging.gilesecosystem.septemberutil.properties.MessageType;
 import edu.asu.diging.gilesecosystem.septemberutil.service.ISystemMessageHandler;
-import edu.asu.diging.gilesecosystem.septemberutil.service.impl.SystemMessageHandler;
 import edu.asu.diging.gilesecosystem.util.exceptions.PropertiesStorageException;
 import edu.asu.diging.gilesecosystem.util.properties.IPropertiesManager;
 
@@ -39,9 +39,6 @@ public class EditPropertiesController {
     @Autowired
     private ISystemMessageHandler messageHandler;
     
-    @Autowired
-    private SystemMessageHandler msgHandler;
-
     private Map<String, String> ocrTypeMap = new HashMap<>();
     private Map<String, String> langTypeMap = new HashMap<>();
     private String defaultLang = new String("");
@@ -62,14 +59,18 @@ public class EditPropertiesController {
         page.setGilesAccessToken(propertyManager.getProperty(Properties.GILES_ACCESS_TOKEN));
         page.setBaseUrl(propertyManager.getProperty(Properties.BASE_URL));
 
-        TesseractOCRParser tessPars = new TesseractOCRParser(true,msgHandler);
+        TesseractOCRConfig config = new TesseractOCRConfig();
+        String tesseractBin = propertyManager.getProperty(Properties.TESSERACT_BIN_FOLDER);
+        String tesseractData = propertyManager.getProperty(Properties.TESSERACT_DATA_FOLDER);
+        config.setTesseractPath(tesseractBin);
+        config.setTessdataPath(tesseractData);
+        TesseractOCRParser tessPars = new TesseractOCRParser(true,messageHandler);
         List<String> langs = new ArrayList<String>();
-        langs.addAll(tessPars.getTessLangs(propertyManager)); 
+        langs.addAll(tessPars.getTessLangs(config)); 
         
         for (int i = 1; i < langs.size(); i++) {
             langTypeMap.put(langs.get(i), langs.get(i));
         }
-        tessPars = null;
         if (langTypeMap.containsKey(Properties.ENGLISH)) {
             defaultLang = langTypeMap.get(Properties.ENGLISH);
         }

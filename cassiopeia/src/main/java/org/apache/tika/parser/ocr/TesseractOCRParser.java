@@ -64,10 +64,8 @@ import org.apache.tika.sax.XHTMLContentHandler;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
-import edu.asu.diging.gilesecosystem.cassiopeia.core.properties.Properties;
 import edu.asu.diging.gilesecosystem.septemberutil.properties.MessageType;
 import edu.asu.diging.gilesecosystem.septemberutil.service.ISystemMessageHandler;
-import edu.asu.diging.gilesecosystem.util.properties.IPropertiesManager;
 
 /**
  * TesseractOCRParser powered by tesseract-ocr engine. To enable this parser,
@@ -351,13 +349,14 @@ public class TesseractOCRParser extends AbstractParser {
      * @param propertyManager
      * @return String[] - the list of available languages
      */
-    public List<String> getTessLangs(IPropertiesManager propertyManager) {
-        String tesseractBin = propertyManager.getProperty(Properties.TESSERACT_BIN_FOLDER);
-        String command = tesseractBin + "/tesseract --list-langs";
+    public List<String> getTessLangs(TesseractOCRConfig config) {
+        String command = config.getTesseractPath() + "/tesseract --list-langs";
         List<String> output = new ArrayList<String>();
         BufferedReader reader = null;
         try {
+            // The command to get all the languages Tesseract has ,is run and gets the input in Process class.
             Process proc = Runtime.getRuntime().exec(command);
+            // The reader gets the language names from the input stream of the process 
             reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
             String line = "";
              /* proc.getInputStream() will contain string such as 
@@ -366,7 +365,7 @@ public class TesseractOCRParser extends AbstractParser {
               eng
               osd"*/
             while ((line = reader.readLine()) != null) {
-                output.add(line); //Taking the line inputs in the list 'output' 
+                output.add(line); //Taking the line inputs (the language names) in the list 'output' 
             }
             proc.waitFor();
         } catch (IOException e) {
