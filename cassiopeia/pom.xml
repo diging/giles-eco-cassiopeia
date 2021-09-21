@@ -14,7 +14,7 @@
         <spring-security-version>4.1.3.RELEASE</spring-security-version>
         <geco.requests.version>0.6</geco.requests.version>
         <geco.util.version>0.4.2</geco.util.version>
-        <geco.september.util.version>0.2</geco.september.util.version>
+        <geco.september.util.version>0.3</geco.september.util.version>
         <geco.kafka-util.version>0.1</geco.kafka-util.version>
 
         <tomcat.deploy.path></tomcat.deploy.path>
