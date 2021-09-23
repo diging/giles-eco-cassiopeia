@@ -20,7 +20,7 @@
 
 	
 	<!-- Application Loggers -->
-	<logger name="edu.asu.template">
+	<logger name="edu.asu.diging">
 		<level value="${log.level}" />
 	</logger>
 	
