@@ -246,7 +246,7 @@ public class TesseractOCRParser extends AbstractParser {
     private void doOCR(File input, File output, TesseractOCRConfig config) throws IOException, TikaException {
         
         List<String> cmd = new ArrayList<>(Arrays.asList(config.getTesseractPath() + getTesseractProg(), input.getPath(), output.getPath(), "-l",
-            config.getLanguage(), "-psm", config.getPageSegMode()));
+            config.getLanguage(), "--psm", config.getPageSegMode()));
         
         if (createHOCR) {
             cmd.add("hocr");
