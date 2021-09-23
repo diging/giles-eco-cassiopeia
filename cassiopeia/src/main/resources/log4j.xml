@@ -44,6 +44,10 @@
 	<logger name="org.springframework.web">
 		<level value="${log.level}" />
 	</logger>
+	
+	<logger name="org.apache.tika">
+		<level value="debug" />
+	</logger>
 
 	<!-- Root Logger -->
 	<root>
