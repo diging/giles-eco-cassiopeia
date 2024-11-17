@@ -12,10 +12,10 @@
         <org.slf4j-version>1.7.5</org.slf4j-version>
         <org.springframework-version>4.3.1.RELEASE</org.springframework-version>
         <spring-security-version>4.1.3.RELEASE</spring-security-version>
-        <geco.requests.version>0.6</geco.requests.version>
-        <geco.util.version>0.4.2</geco.util.version>
+        <geco.requests.version>0.13</geco.requests.version>
+        <geco.util.version>0.6</geco.util.version>
         <geco.september.util.version>0.3</geco.september.util.version>
-        <geco.kafka-util.version>0.1</geco.kafka-util.version>
+        <geco.kafka-util.version>0.2</geco.kafka-util.version>
 
         <tomcat.deploy.path></tomcat.deploy.path>
         <tomcat.app.name>cassiopeia</tomcat.app.name>
@@ -32,6 +32,10 @@
 
         <cassiopeia.base.url>http://localhost:8083/cassiopeia</cassiopeia.base.url>
         <kafka.hosts>localhost:9092</kafka.hosts>
+        
+        <!-- Zookeeper -->
+        <zookeeper.host>localhost</zookeeper.host>
+        <zookeeper.port>2181</zookeeper.port>
 
         <tesseract.bin></tesseract.bin>
         <tesseract.data></tesseract.data>
@@ -43,13 +47,13 @@
 
         <!-- Giles Ecosystem -->
         <dependency>
-            <groupId>edu.asu.diging.giles-eco</groupId>
-            <artifactId>requests</artifactId>
+            <groupId>edu.asu.diging</groupId>
+            <artifactId>giles-eco-requests</artifactId>
             <version>${geco.requests.version}</version>
         </dependency>
         <dependency>
-            <groupId>edu.asu.diging.giles-eco</groupId>
-            <artifactId>util</artifactId>
+            <groupId>edu.asu.diging</groupId>
+            <artifactId>giles-eco-util</artifactId>
             <version>${geco.util.version}</version>
         </dependency>
         <dependency>
@@ -58,8 +62,8 @@
             <version>${geco.september.util.version}</version>
         </dependency>
         <dependency>
-        	<groupId>edu.asu.diging.giles-eco</groupId>
-        	<artifactId>kafka-util</artifactId>
+        	<groupId>edu.asu.diging</groupId>
+        	<artifactId>giles-eco-kafka-util</artifactId>
         	<version>${geco.kafka-util.version}</version>
         </dependency>
 
@@ -247,7 +251,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>2.6</version>
+                <version>3.3.2</version>
                 <configuration>
                     <webResources>
                         <resource>
@@ -269,8 +273,8 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
             <plugin>
