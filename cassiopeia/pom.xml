@@ -32,6 +32,10 @@
 
         <cassiopeia.base.url>http://localhost:8083/cassiopeia</cassiopeia.base.url>
         <kafka.hosts>localhost:9092</kafka.hosts>
+        
+        <!-- Zookeeper -->
+        <zookeeper.host>localhost</zookeeper.host>
+        <zookeeper.port>2181</zookeeper.port>
 
         <tesseract.bin></tesseract.bin>
         <tesseract.data></tesseract.data>
